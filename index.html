@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>French Flashcards</title>
+<style>
+:root {
+  --bg: #FFF8F0;
+  --card-back: #3A5A8C;
+  --accent1: #FF6B6B;
+  --accent2: #FFD166;
+  --accent3: #06D6A0;
+  --accent4: #118AB2;
+  --text-dark: #2D2D2D;
+  --shadow: 0 8px 32px rgba(58, 90, 140, 0.18);
+  --radius: 24px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 60px;
+}
+header { text-align: center; margin-bottom: 28px; }
+.flag { font-size: 2.5rem; margin-bottom: 4px; display: block; }
+h1 { font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--card-back); line-height: 1.1; }
+h1 span { color: var(--accent1); }
+.subtitle { font-size: 0.95rem; color: #7A8BA0; margin-top: 4px; font-weight: 600; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.7); border-radius: 50px; padding: 5px; }
+.tab { padding: 8px 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #7A8BA0; }
+.tab.active { background: var(--card-back); color: white; }
+
+.top-controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+.pill-btn { padding: 7px 16px; border-radius: 40px; border: 2px solid rgba(58,90,140,0.2); font-weight: 700; font-size: 0.85rem; cursor: pointer; background: transparent; color: #7A8BA0; }
+.pill-btn.active { background: var(--accent2); border-color: var(--accent2); color: var(--text-dark); }
+
+.progress-bar { width: 100%; max-width: 480px; height: 8px; background: rgba(58,90,140,0.15); border-radius: 10px; margin-bottom: 10px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent4)); border-radius: 10px; transition: width 0.4s ease; }
+.progress-text { font-size: 0.82rem; color: #7A8BA0; font-weight: 700; margin-bottom: 20px; }
+
+.review-banner { width: 100%; max-width: 420px; background: linear-gradient(135deg, var(--accent1), #E74C3C); color: white; border-radius: 16px; padding: 12px 20px; margin-bottom: 16px; text-align: center; font-weight: 700; font-size: 0.95rem; display: none; gap: 8px; }
+.review-banner.show { display: flex; align-items: center; justify-content: center; }
+.review-banner button { background: rgba(255,255,255,0.25); border: none; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+
+.card-area { width: 100%; max-width: 420px; min-height: 220px; margin-bottom: 24px; background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); border: 3px solid rgba(58,90,140,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.card-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #B0BFCF; margin-bottom: 14px; }
+.card-word { font-weight: 800; font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--card-back); text-align: center; line-height: 1.1; }
+.card-hint { font-size: 0.78rem; color: #C5D0DC; margin-top: 16px; font-weight: 600; }
+
+.result-overlay { position: absolute; inset: 0; border-radius: calc(var(--radius) - 3px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.result-overlay.show { opacity: 1; pointer-events: auto; }
+.result-overlay.correct-overlay { background: rgba(6,214,160,0.95); }
+.result-overlay.wrong-overlay { background: rgba(255,107,107,0.95); }
+.result-icon { font-size: 2.2rem; margin-bottom: 6px; }
+.result-msg { font-weight: 800; font-size: 1.3rem; color: white; text-align: center; }
+.result-answer { font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-top: 6px; font-weight: 700; text-align: center; }
+
+.type-area { width: 100%; max-width: 420px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+.input-row { display: flex; gap: 10px; }
+.answer-input { flex: 1; padding: 14px 20px; border-radius: 50px; border: 2.5px solid rgba(58,90,140,0.2); background: white; font-size: 1.1rem; font-weight: 600; color: var(--text-dark); outline: none; }
+.answer-input:focus { border-color: var(--card-back); }
+.answer-input.correct-input { border-color: var(--accent3); background: rgba(6,214,160,0.07); }
+.answer-input.wrong-input { border-color: var(--accent1); background: rgba(255,107,107,0.07); }
+.answer-input:disabled { opacity: 0.7; }
+
+.btn-check { padding: 14px 22px; border-radius: 50px; border: none; background: var(--card-back); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; white-space: nowrap; -webkit-appearance: none; -webkit-tap-highlight-color: transparent; }
+.btn-check:disabled { opacity: 0.4; }
+
+.accent-bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 16px; }
+.accent-btn { padding: 5px 11px; border-radius: 20px; border: 1.5px solid rgba(58,90,140,0.2); background: white; font-size: 0.95rem; font-weight: 700; color: var(--card-back); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+.feedback-strip { width: 100%; max-width: 420px; border-radius: 16px; padding: 12px 20px; margin-bottom: 14px; text-align: center; font-weight: 700; font-size: 1rem; opacity: 0; transition: opacity 0.3s; }
+.feedback-strip.show { opacity: 1; }
+.feedback-strip.correct-strip { background: rgba(6,214,160,0.15); color: #028A6A; }
+.feedback-strip.wrong-strip { background: rgba(255,107,107,0.15); color: #C0392B; }
+
+.btn-next { padding: 13px 32px; background: var(--accent3); color: white; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 20px; display: none; -webkit-tap-highlight-color: transparent; }
+.btn-next.show { display: block; }
+
+.stats { display: flex; gap: 20px; background: white; border-radius: 20px; padding: 14px 28px; margin-bottom: 20px; }
+.stat { text-align: center; }
+.stat-num { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.stat-num.green { color: var(--accent3); }
+.stat-num.red { color: var(--accent1); }
+.stat-num.blue { color: var(--accent4); }
+.stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B0BFCF; margin-top: 2px; }
+.stat-divider { width: 1px; background: rgba(0,0,0,0.08); }
+
+.bottom-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn-shuffle { padding: 10px 22px; background: rgba(58,90,140,0.08); color: var(--card-back); border-radius: 50px; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.btn-review { padding: 10px 22px; background: var(--accent1); color: white; border-radius: 50px; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.btn-review:disabled { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="flag">🇫🇷</span>
+  <h1>Apprends le <span>Français</span>!</h1>
+  <p class="subtitle">Learn French body vocabulary</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-all">🃏 All Words</button>
+  <button class="tab" id="tab-visage">😊 Le Visage</button>
+  <button class="tab" id="tab-corps">🧍 Le Corps</button>
+</div>
+
+<div class="top-controls">
+  <button class="pill-btn active" id="mode-fr">🇫🇷 → 🇬🇧</button>
+  <button class="pill-btn" id="mode-en">🇬🇧 → 🇫🇷</button>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-text" id="progressText">Card 1 of 39</div>
+
+<div class="review-banner" id="reviewBanner">
+  🔁 Reviewing missed words only
+  <button id="exitReviewBtn">Exit Review</button>
+</div>
+
+<div class="card-area">
+  <div class="card-label" id="frontLabel">FRENCH</div>
+  <div class="card-word" id="frontWord">les cheveux</div>
+  <div class="card-hint">✏️ Type your answer below</div>
+  <div class="result-overlay" id="resultOverlay">
+    <div class="result-icon" id="resultIcon">✓</div>
+    <div class="result-msg" id="resultMsg">Correct!</div>
+    <div class="result-answer" id="resultAnswer"></div>
+  </div>
+</div>
+
+<div class="type-area">
+  <div class="input-row">
+    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+    <button class="btn-check" id="checkBtn">Check ↵</button>
+  </div>
+  <div class="accent-bar" id="accentBar"></div>
+</div>
+
+<div class="feedback-strip" id="feedbackStrip"></div>
+<button class="btn-next" id="nextBtn">Next card →</button>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num green" id="statCorrect">0</div><div class="stat-label">Correct</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">39</div><div class="stat-label">Remaining</div></div>
+</div>
+
+<div class="bottom-actions">
+  <button class="btn-shuffle" id="shuffleBtn">🔀 Shuffle Cards</button>
+  <button class="btn-review" id="reviewBtn" disabled>📖 Review Missed</button>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  const allCards = [
+    { fr: "les cheveux", en: "the hair", emoji: "💇", category: "visage" },
+    { fr: "le front", en: "the forehead", emoji: "😊", category: "visage" },
+    { fr: "les sourcils", en: "the eyebrows", emoji: "🤨", category: "visage" },
+    { fr: "les yeux", en: "the eyes", emoji: "👁️", category: "visage" },
+    { fr: "les cils", en: "the eyelashes", emoji: "😉", category: "visage" },
+    { fr: "les oreilles", en: "the ears", emoji: "👂", category: "visage" },
+    { fr: "le nez", en: "the nose", emoji: "👃", category: "visage" },
+    { fr: "les narines", en: "the nostrils", emoji: "👃", category: "visage" },
+    { fr: "les joues", en: "the cheeks", emoji: "😊", category: "visage" },
+    { fr: "la bouche", en: "the mouth", emoji: "👄", category: "visage" },
+    { fr: "les lèvres", en: "the lips", emoji: "💋", category: "visage" },
+    { fr: "les dents", en: "the teeth", emoji: "🦷", category: "visage" },
+    { fr: "le menton", en: "the chin", emoji: "🧏", category: "visage" },
+    { fr: "la tête", en: "the head", emoji: "🧠", category: "corps" },
+    { fr: "le cou", en: "the neck", emoji: "🧣", category: "corps" },
+    { fr: "le dos", en: "the back", emoji: "🔙", category: "corps" },
+    { fr: "les épaules", en: "the shoulders", emoji: "💪", category: "corps" },
+    { fr: "le bras", en: "the arm", emoji: "💪", category: "corps" },
+    { fr: "le coude", en: "the elbow", emoji: "🦾", category: "corps" },
+    { fr: "la poitrine", en: "the chest", emoji: "🫀", category: "corps" },
+    { fr: "le nombril", en: "the belly button", emoji: "🎯", category: "corps" },
+    { fr: "le poignet", en: "the wrist", emoji: "⌚", category: "corps" },
+    { fr: "la main", en: "the hand", emoji: "✋", category: "corps" },
+    { fr: "les doigts", en: "the fingers", emoji: "🖐️", category: "corps" },
+    { fr: "le ventre", en: "the belly", emoji: "🫃", category: "corps" },
+    { fr: "les fesses", en: "the buttocks", emoji: "🍑", category: "corps" },
+    { fr: "la jambe", en: "the leg", emoji: "🦵", category: "corps" },
+    { fr: "la cuisse", en: "the thigh", emoji: "🦵", category: "corps" },
+    { fr: "le genou", en: "the knee", emoji: "🦵", category: "corps" },
+    { fr: "le mollet", en: "the calf", emoji: "🦵", category: "corps" },
+    { fr: "la cheville", en: "the ankle", emoji: "🦶", category: "corps" },
+    { fr: "le pied", en: "the foot", emoji: "🦶", category: "corps" },
+    { fr: "le talon", en: "the heel", emoji: "👠", category: "corps" },
+    { fr: "les orteils", en: "the toes", emoji: "🦶", category: "corps" },
+    { fr: "le pouce", en: "the thumb", emoji: "👍", category: "corps" },
+    { fr: "l'index", en: "the index finger", emoji: "☝️", category: "corps" },
+    { fr: "le majeur", en: "the middle finger", emoji: "🖕", category: "corps" },
+    { fr: "l'annulaire", en: "the ring finger", emoji: "💍", category: "corps" },
+    { fr: "l'auriculaire", en: "the little finger", emoji: "🤙", category: "corps" },
+  ];
+
+  const FR_ACCENTS = ['à','â','ç','è','é','ê','ë','î','ï','ô','ù','û','ü','œ','æ'];
+
+  let cards = allCards.slice();
+  let current = 0;
+  let mode = 'fr';
+  let scores = {};
+  let answered = false;
+  let reviewMode = false;
+  let originalCards = [];
+
+  function normalise(s) {
+    return s.trim().toLowerCase().replace(/['']/g, "'").replace(/\s+/g, ' ');
+  }
+  
+  function stripAccents(s) {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  
+  function isCorrect(userInput, target) {
+    const u = normalise(userInput);
+    const t = normalise(target);
+    if (u === t) return true;
+    if (mode === 'fr') {
+      const tNoThe = t.replace(/^the\s+/, '');
+      if (u === tNoThe) return true;
+    }
+    if (mode === 'en') {
+      if (stripAccents(u) === stripAccents(t)) return true;
+      const tNoArticle = t.replace(/^(le|la|les|l')\s*/i, '');
+      if (u === normalise(tNoArticle) || stripAccents(u) === stripAccents(tNoArticle)) return true;
+    }
+    return false;
+  }
+
+  function renderCard() {
+    const card = cards[current];
+    if (!card) return;
+    answered = false;
+
+    if (mode === 'fr') {
+      document.getElementById('frontLabel').textContent = 'FRENCH';
+      document.getElementById('frontWord').textContent = card.fr;
+    } else {
+      document.getElementById('frontLabel').textContent = 'ENGLISH';
+      document.getElementById('frontWord').textContent = card.en;
+    }
+
+    const input = document.getElementById('answerInput');
+    input.value = '';
+    input.disabled = false;
+    input.className = 'answer-input';
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('resultOverlay').className = 'result-overlay';
+    document.getElementById('feedbackStrip').className = 'feedback-strip';
+    document.getElementById('nextBtn').classList.remove('show');
+
+    renderAccentBar();
+
+    const pct = ((current + 1) / cards.length) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = 'Card ' + (current + 1) + ' of ' + cards.length;
+
+    setTimeout(function() {
+      document.getElementById('answerInput').focus();
+    }, 100);
+  }
+
+  function renderAccentBar() {
+    const bar = document.getElementById('accentBar');
+    if (mode !== 'en') { 
+      bar.innerHTML = ''; 
+      return; 
+    }
+    bar.innerHTML = FR_ACCENTS.map(function(a) {
+      return '<button class="accent-btn" data-char="' + a + '">' + a + '</button>';
+    }).join('');
+    
+    // Add click handlers to accent buttons
+    var btns = bar.querySelectorAll('.accent-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].onclick = function() {
+        insertAccent(this.getAttribute('data-char'));
+      };
+    }
+  }
+
+  function insertAccent(char) {
+    const input = document.getElementById('answerInput');
+    if (input.disabled) return;
+    const s = input.selectionStart;
+    const e = input.selectionEnd;
+    input.value = input.value.slice(0, s) + char + input.value.slice(e);
+    input.selectionStart = input.selectionEnd = s + 1;
+    input.focus();
+  }
+
+  function checkAnswer() {
+    if (answered) { 
+      nextCard(); 
+      return; 
+    }
+    
+    const card = cards[current];
+    const input = document.getElementById('answerInput');
+    const userValue = input.value;
+    
+    if (!userValue.trim()) return;
+
+    const target = mode === 'fr' ? card.en : card.fr;
+    const correct = isCorrect(userValue, target);
+    
+    answered = true;
+    input.disabled = true;
+    document.getElementById('checkBtn').disabled = true;
+
+    const overlay = document.getElementById('resultOverlay');
+    const fb = document.getElementById('feedbackStrip');
+
+    if (correct) {
+      input.classList.add('correct-input');
+      overlay.className = 'result-overlay correct-overlay show';
+      document.getElementById('resultIcon').textContent = '✓';
+      document.getElementById('resultMsg').textContent = 'Correct! 🎉';
+      document.getElementById('resultAnswer').textContent = target;
+      fb.textContent = '✓  "' + target + '"';
+      fb.className = 'feedback-strip correct-strip show';
+      scores[current] = true;
+    } else {
+      input.classList.add('wrong-input');
+      overlay.className = 'result-overlay wrong-overlay show';
+      document.getElementById('resultIcon').textContent = '✗';
+      document.getElementById('resultMsg').textContent = 'Not quite…';
+      document.getElementById('resultAnswer').textContent = 'Answer: ' + target;
+      fb.textContent = '✗  The answer was: "' + target + '"';
+      fb.className = 'feedback-strip wrong-strip show';
+      scores[current] = false;
+    }
+    
+    updateStats();
+    document.getElementById('nextBtn').classList.add('show');
+  }
+
+  function nextCard() {
+    if (current < cards.length - 1) {
+      current++;
+      renderCard();
+    } else {
+      const correct = Object.keys(scores).filter(function(k) { return scores[k] === true; }).length;
+      const fb = document.getElementById('feedbackStrip');
+      fb.textContent = '🎉 Deck complete! ' + correct + '/' + cards.length + ' correct. Shuffle to go again!';
+      fb.className = 'feedback-strip correct-strip show';
+      document.getElementById('nextBtn').classList.remove('show');
+    }
+  }
+
+  function updateStats() {
+    var correct = Object.keys(scores).filter(function(k) { return scores[k] === true; }).length;
+    var incorrect = Object.keys(scores).filter(function(k) { return scores[k] === false; }).length;
+    var remaining = Math.max(0, cards.length - Object.keys(scores).length);
+    
+    document.getElementById('statCorrect').textContent = correct;
+    document.getElementById('statIncorrect').textContent = incorrect;
+    document.getElementById('statRemaining').textContent = remaining;
+    
+    document.getElementById('reviewBtn').disabled = incorrect === 0;
+  }
+
+  function setCategory(cat) {
+    document.getElementById('tab-all').classList.toggle('active', cat === 'all');
+    document.getElementById('tab-visage').classList.toggle('active', cat === 'visage');
+    document.getElementById('tab-corps').classList.toggle('active', cat === 'corps');
+    
+    if (cat === 'all') {
+      cards = allCards.slice();
+    } else {
+      cards = allCards.filter(function(c) { return c.category === cat; });
+    }
+    
+    scores = {};
+    current = 0;
+    reviewMode = false;
+    document.getElementById('reviewBanner').classList.remove('show');
+    renderCard();
+    updateStats();
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('mode-fr').classList.toggle('active', m === 'fr');
+    document.getElementById('mode-en').classList.toggle('active', m === 'en');
+    scores = {};
+    current = 0;
+    reviewMode = false;
+    document.getElementById('reviewBanner').classList.remove('show');
+    renderCard();
+    updateStats();
+  }
+
+  function shuffleCards() {
+    if (reviewMode) {
+      cards = originalCards.slice();
+      reviewMode = false;
+      originalCards = [];
+      document.getElementById('reviewBanner').classList.remove('show');
+    }
+    
+    for (var i = cards.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = cards[i];
+      cards[i] = cards[j];
+      cards[j] = temp;
+    }
+    
+    scores = {};
+    current = 0;
+    renderCard();
+    updateStats();
+  }
+
+  function reviewMissed() {
+    var missedIndices = [];
+    for (var k in scores) {
+      if (scores[k] === false) {
+        missedIndices.push(parseInt(k));
+      }
+    }
+    
+    if (missedIndices.length === 0) return;
+    
+    originalCards = cards.slice();
+    reviewMode = true;
+    
+    cards = missedIndices.map(function(idx) { return originalCards[idx]; });
+    
+    scores = {};
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.add('show');
+    
+    renderCard();
+    updateStats();
+  }
+
+  function exitReview() {
+    if (!reviewMode) return;
+    
+    cards = originalCards.slice();
+    reviewMode = false;
+    originalCards = [];
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.remove('show');
+    
+    renderCard();
+    updateStats();
+  }
+
+  // Setup event handlers
+  document.getElementById('checkBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    checkAnswer();
+    return false;
+  };
+  
+  document.getElementById('nextBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    nextCard();
+    return false;
+  };
+  
+  document.getElementById('shuffleBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    shuffleCards();
+    return false;
+  };
+  
+  document.getElementById('reviewBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    reviewMissed();
+    return false;
+  };
+  
+  document.getElementById('exitReviewBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    exitReview();
+    return false;
+  };
+  
+  document.getElementById('tab-all').onclick = function() { setCategory('all'); };
+  document.getElementById('tab-visage').onclick = function() { setCategory('visage'); };
+  document.getElementById('tab-corps').onclick = function() { setCategory('corps'); };
+  
+  document.getElementById('mode-fr').onclick = function() { setMode('fr'); };
+  document.getElementById('mode-en').onclick = function() { setMode('en'); };
+  
+  document.getElementById('answerInput').onkeypress = function(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault();
+      if (!answered) checkAnswer();
+      else nextCard();
+    }
+  };
+
+  // Test that JavaScript is working
+  document.getElementById('frontWord').style.border = '2px solid green';
+  setTimeout(function() {
+    document.getElementById('frontWord').style.border = 'none';
+  }, 1000);
+
+  // Initialize
+  renderCard();
+  updateStats();
+})();
+</script>
+</body>
+</html>
