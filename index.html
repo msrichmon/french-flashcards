@@ -111,6 +111,7 @@ h1 span { color: var(--accent1); }
   <button class="tab active" id="tab-all">🃏 All Words</button>
   <button class="tab" id="tab-visage">😊 Le Visage</button>
   <button class="tab" id="tab-corps">🧍 Le Corps</button>
+  <button class="tab" id="tab-prepositions">📍 Prepositions</button>
 </div>
 
 <div class="top-controls">
@@ -119,7 +120,7 @@ h1 span { color: var(--accent1); }
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-<div class="progress-text" id="progressText">Card 1 of 39</div>
+<div class="progress-text" id="progressText">Card 1 of 59</div>
 
 <div class="review-banner" id="reviewBanner">
   🔁 Reviewing missed words only
@@ -153,7 +154,7 @@ h1 span { color: var(--accent1); }
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
   <div class="stat-divider"></div>
-  <div class="stat"><div class="stat-num blue" id="statRemaining">39</div><div class="stat-label">Remaining</div></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">59</div><div class="stat-label">Remaining</div></div>
 </div>
 
 <div class="bottom-actions">
@@ -205,6 +206,27 @@ h1 span { color: var(--accent1); }
     { fr: "le majeur", en: "the middle finger", emoji: "🖕", category: "corps" },
     { fr: "l'annulaire", en: "the ring finger", emoji: "💍", category: "corps" },
     { fr: "l'auriculaire", en: "the little finger", emoji: "🤙", category: "corps" },
+    // Prepositions
+    { fr: "à", en: "to, at", emoji: "➡️", category: "prepositions" },
+    { fr: "de", en: "of, from", emoji: "⬅️", category: "prepositions" },
+    { fr: "dans", en: "in", emoji: "📦", category: "prepositions" },
+    { fr: "sur", en: "on", emoji: "🔝", category: "prepositions" },
+    { fr: "sous", en: "under", emoji: "⬇️", category: "prepositions" },
+    { fr: "avec", en: "with", emoji: "🤝", category: "prepositions" },
+    { fr: "sans", en: "without", emoji: "🚫", category: "prepositions" },
+    { fr: "pour", en: "for", emoji: "🎁", category: "prepositions" },
+    { fr: "par", en: "by, through", emoji: "🚪", category: "prepositions" },
+    { fr: "entre", en: "between", emoji: "↔️", category: "prepositions" },
+    { fr: "derrière", en: "behind", emoji: "👈", category: "prepositions" },
+    { fr: "devant", en: "in front of", emoji: "👉", category: "prepositions" },
+    { fr: "chez", en: "at (someone's place)", emoji: "🏠", category: "prepositions" },
+    { fr: "vers", en: "towards", emoji: "🎯", category: "prepositions" },
+    { fr: "pendant", en: "during", emoji: "⏰", category: "prepositions" },
+    { fr: "avant", en: "before", emoji: "⏮️", category: "prepositions" },
+    { fr: "après", en: "after", emoji: "⏭️", category: "prepositions" },
+    { fr: "contre", en: "against", emoji: "🛡️", category: "prepositions" },
+    { fr: "parmi", en: "among", emoji: "👥", category: "prepositions" },
+    { fr: "en", en: "in, by", emoji: "📍", category: "prepositions" },
   ];
 
   const FR_ACCENTS = ['à','â','ç','è','é','ê','ë','î','ï','ô','ù','û','ü','œ','æ'];
@@ -378,6 +400,7 @@ h1 span { color: var(--accent1); }
     document.getElementById('tab-all').classList.toggle('active', cat === 'all');
     document.getElementById('tab-visage').classList.toggle('active', cat === 'visage');
     document.getElementById('tab-corps').classList.toggle('active', cat === 'corps');
+    document.getElementById('tab-prepositions').classList.toggle('active', cat === 'prepositions');
     
     if (cat === 'all') {
       cards = allCards.slice();
@@ -503,6 +526,7 @@ h1 span { color: var(--accent1); }
   document.getElementById('tab-all').onclick = function() { setCategory('all'); };
   document.getElementById('tab-visage').onclick = function() { setCategory('visage'); };
   document.getElementById('tab-corps').onclick = function() { setCategory('corps'); };
+  document.getElementById('tab-prepositions').onclick = function() { setCategory('prepositions'); };
   
   document.getElementById('mode-fr').onclick = function() { setMode('fr'); };
   document.getElementById('mode-en').onclick = function() { setMode('en'); };
