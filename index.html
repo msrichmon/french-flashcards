@@ -53,6 +53,7 @@ h1 span { color: var(--accent1); }
 .card-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #B0BFCF; margin-bottom: 14px; }
 .card-word { font-weight: 800; font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--card-back); text-align: center; line-height: 1.1; }
 .card-hint { font-size: 0.78rem; color: #C5D0DC; margin-top: 16px; font-weight: 600; }
+.card-example { font-size: 0.85rem; color: #7A8BA0; margin-top: 12px; font-style: italic; text-align: center; line-height: 1.4; max-width: 100%; }
 
 .result-overlay { position: absolute; inset: 0; border-radius: calc(var(--radius) - 3px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 .result-overlay.show { opacity: 1; pointer-events: auto; }
@@ -61,6 +62,7 @@ h1 span { color: var(--accent1); }
 .result-icon { font-size: 2.2rem; margin-bottom: 6px; }
 .result-msg { font-weight: 800; font-size: 1.3rem; color: white; text-align: center; }
 .result-answer { font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-top: 6px; font-weight: 700; text-align: center; }
+.result-example { font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-top: 8px; font-style: italic; text-align: center; line-height: 1.3; }
 
 .type-area { width: 100%; max-width: 420px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
 .input-row { display: flex; gap: 10px; }
@@ -83,6 +85,9 @@ h1 span { color: var(--accent1); }
 
 .btn-next { padding: 13px 32px; background: var(--accent3); color: white; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 20px; display: none; -webkit-tap-highlight-color: transparent; }
 .btn-next.show { display: block; }
+
+.btn-skip { padding: 11px 24px; background: rgba(58,90,140,0.1); color: var(--card-back); border: 2px solid rgba(58,90,140,0.2); border-radius: 50px; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-bottom: 20px; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.btn-skip:hover { background: rgba(58,90,140,0.15); }
 
 .stats { display: flex; gap: 20px; background: white; border-radius: 20px; padding: 14px 28px; margin-bottom: 20px; }
 .stat { text-align: center; }
@@ -120,7 +125,7 @@ h1 span { color: var(--accent1); }
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-<div class="progress-text" id="progressText">Card 1 of 59</div>
+<div class="progress-text" id="progressText">Card 1 of 79</div>
 
 <div class="review-banner" id="reviewBanner">
   🔁 Reviewing missed words only
@@ -130,11 +135,13 @@ h1 span { color: var(--accent1); }
 <div class="card-area">
   <div class="card-label" id="frontLabel">FRENCH</div>
   <div class="card-word" id="frontWord">les cheveux</div>
+  <div class="card-example" id="cardExample"></div>
   <div class="card-hint">✏️ Type your answer below</div>
   <div class="result-overlay" id="resultOverlay">
     <div class="result-icon" id="resultIcon">✓</div>
     <div class="result-msg" id="resultMsg">Correct!</div>
     <div class="result-answer" id="resultAnswer"></div>
+    <div class="result-example" id="resultExample"></div>
   </div>
 </div>
 
@@ -148,18 +155,20 @@ h1 span { color: var(--accent1); }
 
 <div class="feedback-strip" id="feedbackStrip"></div>
 <button class="btn-next" id="nextBtn">Next card →</button>
+<button class="btn-skip" id="skipBtn">Skip →</button>
 
 <div class="stats">
   <div class="stat"><div class="stat-num green" id="statCorrect">0</div><div class="stat-label">Correct</div></div>
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
   <div class="stat-divider"></div>
-  <div class="stat"><div class="stat-num blue" id="statRemaining">59</div><div class="stat-label">Remaining</div></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">79</div><div class="stat-label">Remaining</div></div>
 </div>
 
 <div class="bottom-actions">
   <button class="btn-shuffle" id="shuffleBtn">🔀 Shuffle Cards</button>
   <button class="btn-review" id="reviewBtn" disabled>📖 Review Missed</button>
+  <button class="btn-review" id="reviewSkippedBtn" disabled>⏭️ Review Skipped</button>
 </div>
 
 <script>
@@ -207,26 +216,44 @@ h1 span { color: var(--accent1); }
     { fr: "l'annulaire", en: "the ring finger", emoji: "💍", category: "corps" },
     { fr: "l'auriculaire", en: "the little finger", emoji: "🤙", category: "corps" },
     // Prepositions
-    { fr: "à", en: "to, at", emoji: "➡️", category: "prepositions" },
-    { fr: "de", en: "of, from", emoji: "⬅️", category: "prepositions" },
-    { fr: "dans", en: "in", emoji: "📦", category: "prepositions" },
-    { fr: "sur", en: "on", emoji: "🔝", category: "prepositions" },
-    { fr: "sous", en: "under", emoji: "⬇️", category: "prepositions" },
-    { fr: "avec", en: "with", emoji: "🤝", category: "prepositions" },
-    { fr: "sans", en: "without", emoji: "🚫", category: "prepositions" },
-    { fr: "pour", en: "for", emoji: "🎁", category: "prepositions" },
-    { fr: "par", en: "by, through", emoji: "🚪", category: "prepositions" },
-    { fr: "entre", en: "between", emoji: "↔️", category: "prepositions" },
-    { fr: "derrière", en: "behind", emoji: "👈", category: "prepositions" },
-    { fr: "devant", en: "in front of", emoji: "👉", category: "prepositions" },
-    { fr: "chez", en: "at (someone's place)", emoji: "🏠", category: "prepositions" },
-    { fr: "vers", en: "towards", emoji: "🎯", category: "prepositions" },
-    { fr: "pendant", en: "during", emoji: "⏰", category: "prepositions" },
-    { fr: "avant", en: "before", emoji: "⏮️", category: "prepositions" },
-    { fr: "après", en: "after", emoji: "⏭️", category: "prepositions" },
-    { fr: "contre", en: "against", emoji: "🛡️", category: "prepositions" },
-    { fr: "parmi", en: "among", emoji: "👥", category: "prepositions" },
-    { fr: "en", en: "in, by", emoji: "📍", category: "prepositions" },
+    { fr: "à", en: "to, at", emoji: "➡️", category: "prepositions", example: "Je vais à Paris • Je suis à la maison", exampleEn: "I'm going to Paris • I'm at home" },
+    { fr: "de", en: "of, from", emoji: "⬅️", category: "prepositions", example: "Le livre de Marie • Je viens de France", exampleEn: "Marie's book (book of Marie) • I come from France" },
+    { fr: "dans", en: "in", emoji: "📦", category: "prepositions", example: "Le chat est dans la boîte", exampleEn: "The cat is in the box" },
+    { fr: "sur", en: "on", emoji: "🔝", category: "prepositions", example: "Le livre est sur la table", exampleEn: "The book is on the table" },
+    { fr: "sous", en: "under", emoji: "⬇️", category: "prepositions", example: "Le chien est sous la table", exampleEn: "The dog is under the table" },
+    { fr: "avec", en: "with", emoji: "🤝", category: "prepositions", example: "Je vais avec mon ami", exampleEn: "I'm going with my friend" },
+    { fr: "sans", en: "without", emoji: "🚫", category: "prepositions", example: "Un café sans sucre", exampleEn: "A coffee without sugar" },
+    { fr: "pour", en: "for", emoji: "🎁", category: "prepositions", example: "C'est pour toi", exampleEn: "It's for you" },
+    { fr: "par", en: "by, through", emoji: "🚪", category: "prepositions", example: "Écrit par Paul • Je passe par le parc", exampleEn: "Written by Paul • I go through the park" },
+    { fr: "entre", en: "between", emoji: "↔️", category: "prepositions", example: "Entre toi et moi", exampleEn: "Between you and me" },
+    { fr: "derrière", en: "behind", emoji: "👈", category: "prepositions", example: "Derrière la maison", exampleEn: "Behind the house" },
+    { fr: "devant", en: "in front of", emoji: "👉", category: "prepositions", example: "Devant l'école", exampleEn: "In front of the school" },
+    { fr: "chez", en: "at, at someone's place, at someone's house, at Marie's", emoji: "🏠", category: "prepositions", example: "Je suis chez Marie", exampleEn: "I'm at Marie's place / at Marie's" },
+    { fr: "vers", en: "towards", emoji: "🎯", category: "prepositions", example: "Je marche vers la gare", exampleEn: "I'm walking towards the station" },
+    { fr: "pendant", en: "during", emoji: "⏰", category: "prepositions", example: "Pendant les vacances", exampleEn: "During the holidays" },
+    { fr: "avant", en: "before", emoji: "⏮️", category: "prepositions", example: "Avant le dîner", exampleEn: "Before dinner" },
+    { fr: "après", en: "after", emoji: "⏭️", category: "prepositions", example: "Après le film", exampleEn: "After the movie" },
+    { fr: "contre", en: "against", emoji: "🛡️", category: "prepositions", example: "Contre le mur", exampleEn: "Against the wall" },
+    { fr: "parmi", en: "among", emoji: "👥", category: "prepositions", example: "Parmi mes amis", exampleEn: "Among my friends" },
+    { fr: "en", en: "in", emoji: "📍", category: "prepositions", example: "En France • En voiture • En deux heures", exampleEn: "In France • By car • In two hours" },
+    { fr: "depuis", en: "since, from", emoji: "📅", category: "prepositions", example: "J'habite ici depuis 2020 • Depuis Paris", exampleEn: "I've lived here since 2020 • From Paris" },
+    { fr: "jusque", en: "until, up to", emoji: "⏱️", category: "prepositions", example: "Jusqu'à demain • Jusqu'à Paris", exampleEn: "Until tomorrow • Up to Paris" },
+    { fr: "près de", en: "near", emoji: "📍", category: "prepositions", example: "Près de la gare", exampleEn: "Near the station" },
+    { fr: "loin de", en: "far from", emoji: "🏃", category: "prepositions", example: "Loin de Paris", exampleEn: "Far from Paris" },
+    { fr: "autour de", en: "around", emoji: "🔄", category: "prepositions", example: "Autour de la table", exampleEn: "Around the table" },
+    { fr: "dès", en: "from, as early as", emoji: "⏰", category: "prepositions", example: "Dès demain • Dès maintenant", exampleEn: "From tomorrow • From now" },
+    { fr: "durant", en: "during", emoji: "⌚", category: "prepositions", example: "Durant l'été", exampleEn: "During the summer" },
+    { fr: "malgré", en: "despite", emoji: "💪", category: "prepositions", example: "Malgré la pluie", exampleEn: "Despite the rain" },
+    { fr: "sauf", en: "except", emoji: "➖", category: "prepositions", example: "Tous sauf Marie", exampleEn: "Everyone except Marie" },
+    { fr: "selon", en: "according to", emoji: "📰", category: "prepositions", example: "Selon Paul", exampleEn: "According to Paul" },
+    { fr: "envers", en: "towards", emoji: "💗", category: "prepositions", example: "Gentil envers les autres", exampleEn: "Kind towards others" },
+    { fr: "grâce à", en: "thanks to", emoji: "🙏", category: "prepositions", example: "Grâce à toi", exampleEn: "Thanks to you" },
+    { fr: "à cause de", en: "because of", emoji: "❓", category: "prepositions", example: "À cause de la pluie", exampleEn: "Because of the rain" },
+    { fr: "au lieu de", en: "instead of", emoji: "🔀", category: "prepositions", example: "Au lieu de partir", exampleEn: "Instead of leaving" },
+    { fr: "à côté de", en: "next to, beside", emoji: "👫", category: "prepositions", example: "À côté de Marie", exampleEn: "Next to Marie" },
+    { fr: "en face de", en: "across from, opposite", emoji: "↔️", category: "prepositions", example: "En face de l'école", exampleEn: "Across from the school" },
+    { fr: "au-dessus de", en: "above", emoji: "⬆️", category: "prepositions", example: "Au-dessus de la table", exampleEn: "Above the table" },
+    { fr: "au-dessous de", en: "below", emoji: "⬇️", category: "prepositions", example: "Au-dessous de zéro", exampleEn: "Below zero" },
   ];
 
   const FR_ACCENTS = ['à','â','ç','è','é','ê','ë','î','ï','ô','ù','û','ü','œ','æ'];
@@ -238,6 +265,7 @@ h1 span { color: var(--accent1); }
   let answered = false;
   let reviewMode = false;
   let originalCards = [];
+  let skippedCards = {}; // Track which cards were skipped
 
   function normalise(s) {
     return s.trim().toLowerCase().replace(/['']/g, "'").replace(/\s+/g, ' ');
@@ -251,6 +279,37 @@ h1 span { color: var(--accent1); }
     const u = normalise(userInput);
     const t = normalise(target);
     if (u === t) return true;
+    
+    // For multi-word answers (like "to, at" or "by, through"), accept either word
+    if (t.includes(',')) {
+      const options = t.split(',').map(function(opt) { return opt.trim(); });
+      for (var i = 0; i < options.length; i++) {
+        if (u === options[i]) return true;
+      }
+    }
+    
+    // Also check if user input contains commas (to handle "to,at" vs "to, at")
+    if (u.includes(',')) {
+      const userOptions = u.split(',').map(function(opt) { return opt.trim(); });
+      const targetOptions = t.split(',').map(function(opt) { return opt.trim(); });
+      // Check if user provided valid subset
+      var allValid = true;
+      for (var i = 0; i < userOptions.length; i++) {
+        var found = false;
+        for (var j = 0; j < targetOptions.length; j++) {
+          if (userOptions[i] === targetOptions[j]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          allValid = false;
+          break;
+        }
+      }
+      if (allValid && userOptions.length > 0) return true;
+    }
+    
     if (mode === 'fr') {
       const tNoThe = t.replace(/^the\s+/, '');
       if (u === tNoThe) return true;
@@ -274,6 +333,18 @@ h1 span { color: var(--accent1); }
     } else {
       document.getElementById('frontLabel').textContent = 'ENGLISH';
       document.getElementById('frontWord').textContent = card.en;
+    }
+
+    // Show example sentence only if it won't give away the answer
+    // For French→English mode: show French example (doesn't reveal English answer)
+    // For English→French mode: don't show example (would reveal French answer)
+    const exampleEl = document.getElementById('cardExample');
+    if (card.example && mode === 'fr') {
+      exampleEl.textContent = card.example;
+      exampleEl.style.display = 'block';
+    } else {
+      exampleEl.textContent = '';
+      exampleEl.style.display = 'none';
     }
 
     const input = document.getElementById('answerInput');
@@ -344,8 +415,12 @@ h1 span { color: var(--accent1); }
     input.disabled = true;
     document.getElementById('checkBtn').disabled = true;
 
+    // Clear skip status since card is now answered
+    delete skippedCards[current];
+
     const overlay = document.getElementById('resultOverlay');
     const fb = document.getElementById('feedbackStrip');
+    const resultExampleEl = document.getElementById('resultExample');
 
     if (correct) {
       input.classList.add('correct-input');
@@ -367,6 +442,15 @@ h1 span { color: var(--accent1); }
       scores[current] = false;
     }
     
+    // Show English translation of example sentence if it exists
+    if (card.exampleEn) {
+      resultExampleEl.textContent = card.exampleEn;
+      resultExampleEl.style.display = 'block';
+    } else {
+      resultExampleEl.textContent = '';
+      resultExampleEl.style.display = 'none';
+    }
+    
     updateStats();
     document.getElementById('nextBtn').classList.add('show');
   }
@@ -384,16 +468,31 @@ h1 span { color: var(--accent1); }
     }
   }
 
+  function skipCard() {
+    // Mark card as skipped
+    skippedCards[current] = true;
+    
+    // Skip without marking - just go to next card
+    if (current < cards.length - 1) {
+      current++;
+      renderCard();
+    }
+    
+    updateStats();
+  }
+
   function updateStats() {
     var correct = Object.keys(scores).filter(function(k) { return scores[k] === true; }).length;
     var incorrect = Object.keys(scores).filter(function(k) { return scores[k] === false; }).length;
-    var remaining = Math.max(0, cards.length - Object.keys(scores).length);
+    var skipped = Object.keys(skippedCards).length;
+    var remaining = Math.max(0, cards.length - Object.keys(scores).length - skipped);
     
     document.getElementById('statCorrect').textContent = correct;
     document.getElementById('statIncorrect').textContent = incorrect;
     document.getElementById('statRemaining').textContent = remaining;
     
     document.getElementById('reviewBtn').disabled = incorrect === 0;
+    document.getElementById('reviewSkippedBtn').disabled = skipped === 0;
   }
 
   function setCategory(cat) {
@@ -409,6 +508,7 @@ h1 span { color: var(--accent1); }
     }
     
     scores = {};
+    skippedCards = {};
     current = 0;
     reviewMode = false;
     document.getElementById('reviewBanner').classList.remove('show');
@@ -421,6 +521,7 @@ h1 span { color: var(--accent1); }
     document.getElementById('mode-fr').classList.toggle('active', m === 'fr');
     document.getElementById('mode-en').classList.toggle('active', m === 'en');
     scores = {};
+    skippedCards = {};
     current = 0;
     reviewMode = false;
     document.getElementById('reviewBanner').classList.remove('show');
@@ -444,6 +545,7 @@ h1 span { color: var(--accent1); }
     }
     
     scores = {};
+    skippedCards = {};
     current = 0;
     renderCard();
     updateStats();
@@ -473,6 +575,36 @@ h1 span { color: var(--accent1); }
     updateStats();
   }
 
+  function reviewSkipped() {
+    var skippedIndices = [];
+    for (var k in skippedCards) {
+      if (skippedCards[k]) {
+        skippedIndices.push(parseInt(k));
+      }
+    }
+    
+    if (skippedIndices.length === 0) return;
+    
+    originalCards = cards.slice();
+    reviewMode = true;
+    
+    cards = skippedIndices.map(function(idx) { return originalCards[idx]; });
+    
+    // Clear skipped status for review
+    skippedCards = {};
+    scores = {};
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.add('show');
+    document.getElementById('reviewBanner').innerHTML = '🔁 Reviewing skipped words only <button id="exitReviewBtn">Exit Review</button>';
+    
+    // Re-attach exit button handler
+    document.getElementById('exitReviewBtn').onclick = exitReview;
+    
+    renderCard();
+    updateStats();
+  }
+
   function exitReview() {
     if (!reviewMode) return;
     
@@ -482,6 +614,10 @@ h1 span { color: var(--accent1); }
     current = 0;
     
     document.getElementById('reviewBanner').classList.remove('show');
+    document.getElementById('reviewBanner').innerHTML = '🔁 Reviewing missed words only <button id="exitReviewBtn">Exit Review</button>';
+    
+    // Re-attach exit button handler
+    document.getElementById('exitReviewBtn').onclick = exitReview;
     
     renderCard();
     updateStats();
@@ -502,6 +638,13 @@ h1 span { color: var(--accent1); }
     return false;
   };
   
+  document.getElementById('skipBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    skipCard();
+    return false;
+  };
+  
   document.getElementById('shuffleBtn').onclick = function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -513,6 +656,13 @@ h1 span { color: var(--accent1); }
     e.preventDefault();
     e.stopPropagation();
     reviewMissed();
+    return false;
+  };
+  
+  document.getElementById('reviewSkippedBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    reviewSkipped();
     return false;
   };
   
