@@ -432,13 +432,20 @@ h1 span { color: var(--accent1); }
       document.getElementById('frontWord').textContent = card.en;
     }
 
-    // Show example sentence only if it won't give away the answer
+    // Show example sentence based on mode to avoid giving away answers
     // For French→English mode: show French example (doesn't reveal English answer)
-    // For English→French mode: don't show example (would reveal French answer)
+    // For English→French mode: show English example (doesn't reveal French answer)
     const exampleEl = document.getElementById('cardExample');
-    if (card.example && mode === 'fr') {
-      exampleEl.textContent = card.example;
-      exampleEl.style.display = 'block';
+    if (card.example && card.exampleEn) {
+      if (mode === 'fr') {
+        // Show French example
+        exampleEl.textContent = card.example;
+        exampleEl.style.display = 'block';
+      } else {
+        // Show English example
+        exampleEl.textContent = card.exampleEn;
+        exampleEl.style.display = 'block';
+      }
     } else {
       exampleEl.textContent = '';
       exampleEl.style.display = 'none';
@@ -539,9 +546,17 @@ h1 span { color: var(--accent1); }
       scores[current] = false;
     }
     
-    // Show English translation of example sentence if it exists
-    if (card.exampleEn) {
-      resultExampleEl.textContent = card.exampleEn;
+    // Show example translation in result overlay
+    // If we showed French example, now show English translation
+    // If we showed English example, now show French translation
+    if (card.exampleEn && card.example) {
+      if (mode === 'fr') {
+        // Was showing French example, now show English
+        resultExampleEl.textContent = card.exampleEn;
+      } else {
+        // Was showing English example, now show French
+        resultExampleEl.textContent = card.example;
+      }
       resultExampleEl.style.display = 'block';
     } else {
       resultExampleEl.textContent = '';
