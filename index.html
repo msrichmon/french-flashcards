@@ -109,7 +109,6 @@ h1 span { color: var(--accent1); }
 <header>
   <span class="flag">🇫🇷</span>
   <h1>Apprends le <span>Français</span>!</h1>
-  <p class="subtitle">Learn French body vocabulary</p>
 </header>
 
 <div class="tabs">
@@ -117,6 +116,7 @@ h1 span { color: var(--accent1); }
   <button class="tab" id="tab-visage">😊 Le Visage</button>
   <button class="tab" id="tab-corps">🧍 Le Corps</button>
   <button class="tab" id="tab-prepositions">📍 Prepositions</button>
+  <button class="tab" id="tab-conjugations">🔄 Conjugations</button>
 </div>
 
 <div class="top-controls">
@@ -125,7 +125,7 @@ h1 span { color: var(--accent1); }
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-<div class="progress-text" id="progressText">Card 1 of 79</div>
+<div class="progress-text" id="progressText">Card 1 of 169</div>
 
 <div class="review-banner" id="reviewBanner">
   🔁 Reviewing missed words only
@@ -162,7 +162,7 @@ h1 span { color: var(--accent1); }
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
   <div class="stat-divider"></div>
-  <div class="stat"><div class="stat-num blue" id="statRemaining">79</div><div class="stat-label">Remaining</div></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">169</div><div class="stat-label">Remaining</div></div>
 </div>
 
 <div class="bottom-actions">
@@ -254,6 +254,99 @@ h1 span { color: var(--accent1); }
     { fr: "en face de", en: "across from, opposite", emoji: "↔️", category: "prepositions", example: "En face de l'école", exampleEn: "Across from the school" },
     { fr: "au-dessus de", en: "above", emoji: "⬆️", category: "prepositions", example: "Au-dessus de la table", exampleEn: "Above the table" },
     { fr: "au-dessous de", en: "below", emoji: "⬇️", category: "prepositions", example: "Au-dessous de zéro", exampleEn: "Below zero" },
+    // Conjugations - ÊTRE (to be)
+    { fr: "je suis", en: "I am", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "tu es", en: "you are (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "il/elle est", en: "he/she is", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "nous sommes", en: "we are", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "vous êtes", en: "you are (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "ils/elles sont", en: "they are", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "j'étais", en: "I was", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "tu étais", en: "you were (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "il/elle était", en: "he/she was", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "nous étions", en: "we were", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "vous étiez", en: "you were (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "ils/elles étaient", en: "they were", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "je vais être", en: "I am going to be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "tu vas être", en: "you are going to be (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "il/elle va être", en: "he/she is going to be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "nous allons être", en: "we are going to be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "vous allez être", en: "you are going to be (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "ils/elles vont être", en: "they are going to be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "je serai", en: "I will be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "tu seras", en: "you will be (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "il/elle sera", en: "he/she will be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "nous serons", en: "we will be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "vous serez", en: "you will be (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "ils/elles seront", en: "they will be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "j'ai été", en: "I was, I have been", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "tu as été", en: "you were, you have been (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "il/elle a été", en: "he/she was, he/she has been", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "nous avons été", en: "we were, we have been", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "vous avez été", en: "you were, you have been (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "ils/elles ont été", en: "they were, they have been", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    // Conjugations - AVOIR (to have)
+    { fr: "j'ai", en: "I have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "tu as", en: "you have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "il/elle a", en: "he/she has", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "nous avons", en: "we have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "vous avez", en: "you have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "ils/elles ont", en: "they have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "j'avais", en: "I had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "tu avais", en: "you had (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "il/elle avait", en: "he/she had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "nous avions", en: "we had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "vous aviez", en: "you had (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "ils/elles avaient", en: "they had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "je vais avoir", en: "I am going to have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "tu vas avoir", en: "you are going to have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "il/elle va avoir", en: "he/she is going to have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "nous allons avoir", en: "we are going to have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "vous allez avoir", en: "you are going to have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "ils/elles vont avoir", en: "they are going to have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "j'aurai", en: "I will have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "tu auras", en: "you will have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "il/elle aura", en: "he/she will have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "nous aurons", en: "we will have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "vous aurez", en: "you will have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "ils/elles auront", en: "they will have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "j'ai eu", en: "I had, I have had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "tu as eu", en: "you had, you have had (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "il/elle a eu", en: "he/she had, he/she has had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "nous avons eu", en: "we had, we have had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "vous avez eu", en: "you had, you have had (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "ils/elles ont eu", en: "they had, they have had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    // Conjugations - ALLER (to go)
+    { fr: "je vais", en: "I go, I am going", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "tu vas", en: "you go, you are going (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "il/elle va", en: "he/she goes, he/she is going", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "nous allons", en: "we go, we are going", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "vous allez", en: "you go, you are going (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "ils/elles vont", en: "they go, they are going", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "j'allais", en: "I was going", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "tu allais", en: "you were going (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "il/elle allait", en: "he/she was going", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "nous allions", en: "we were going", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "vous alliez", en: "you were going (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "ils/elles allaient", en: "they were going", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "je vais aller", en: "I am going to go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "tu vas aller", en: "you are going to go (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "il/elle va aller", en: "he/she is going to go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "nous allons aller", en: "we are going to go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "vous allez aller", en: "you are going to go (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "ils/elles vont aller", en: "they are going to go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "j'irai", en: "I will go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "tu iras", en: "you will go (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "il/elle ira", en: "he/she will go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "nous irons", en: "we will go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "vous irez", en: "you will go (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "ils/elles iront", en: "they will go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "je suis allé(e)", en: "I went, I have gone", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "tu es allé(e)", en: "you went, you have gone (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "il/elle est allé(e)", en: "he/she went, he/she has gone", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "nous sommes allé(e)s", en: "we went, we have gone", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "vous êtes allé(e)(s)", en: "you went, you have gone (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "ils/elles sont allé(e)s", en: "they went, they have gone", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
   ];
 
   const FR_ACCENTS = ['à','â','ç','è','é','ê','ë','î','ï','ô','ù','û','ü','œ','æ'];
@@ -277,7 +370,11 @@ h1 span { color: var(--accent1); }
   
   function isCorrect(userInput, target) {
     const u = normalise(userInput);
-    const t = normalise(target);
+    let t = normalise(target);
+    
+    // Strip parenthetical notes like (informal), (formal/plural) from target
+    t = t.replace(/\s*\([^)]*\)/g, '');
+    
     if (u === t) return true;
     
     // For multi-word answers (like "to, at" or "by, through"), accept either word
@@ -500,6 +597,7 @@ h1 span { color: var(--accent1); }
     document.getElementById('tab-visage').classList.toggle('active', cat === 'visage');
     document.getElementById('tab-corps').classList.toggle('active', cat === 'corps');
     document.getElementById('tab-prepositions').classList.toggle('active', cat === 'prepositions');
+    document.getElementById('tab-conjugations').classList.toggle('active', cat === 'conjugations');
     
     if (cat === 'all') {
       cards = allCards.slice();
@@ -677,6 +775,7 @@ h1 span { color: var(--accent1); }
   document.getElementById('tab-visage').onclick = function() { setCategory('visage'); };
   document.getElementById('tab-corps').onclick = function() { setCategory('corps'); };
   document.getElementById('tab-prepositions').onclick = function() { setCategory('prepositions'); };
+  document.getElementById('tab-conjugations').onclick = function() { setCategory('conjugations'); };
   
   document.getElementById('mode-fr').onclick = function() { setMode('fr'); };
   document.getElementById('mode-en').onclick = function() { setMode('en'); };
@@ -684,10 +783,25 @@ h1 span { color: var(--accent1); }
   document.getElementById('answerInput').onkeypress = function(e) {
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault();
-      if (!answered) checkAnswer();
-      else nextCard();
+      if (!answered) {
+        checkAnswer();
+      } else {
+        // If already answered and Next button is showing, trigger it
+        nextCard();
+      }
     }
   };
+
+  // Global keyboard handler for Next button when input is disabled
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      // If answered and Next button is visible, trigger it
+      if (answered && document.getElementById('nextBtn').classList.contains('show')) {
+        e.preventDefault();
+        nextCard();
+      }
+    }
+  });
 
   // Test that JavaScript is working
   document.getElementById('frontWord').style.border = '2px solid green';
