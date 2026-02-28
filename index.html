@@ -829,5 +829,273 @@ h1 span { color: var(--accent1); }
   updateStats();
 })();
 </script>
+
+<!-- CloudKit JS SDK -->
+<script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
+
+<script>
+// ============================================================================
+// CLOUDKIT CONFIGURATION - REPLACE WITH YOUR VALUES
+// ============================================================================
+// Get from: https://icloud.developer.apple.com/dashboard
+// After creating a CloudKit container
+// ============================================================================
+
+const cloudKitConfig = {
+  containerIdentifier: 'iCloud.com.yourname.flashcards', // REPLACE THIS
+  apiToken: 'YOUR_API_TOKEN_HERE', // REPLACE THIS
+  environment: 'development' // Use 'development' for testing, 'production' when ready
+};
+
+// ============================================================================
+// CLOUDKIT + GUEST MODE IMPLEMENTATION
+// ============================================================================
+
+const isCloudKitConfigured = cloudKitConfig.apiToken !== 'YOUR_API_TOKEN_HERE';
+let cloudKitContainer = null;
+let cloudKitDatabase = null;
+let currentUser = null;
+let syncMode = 'guest'; // 'guest' or 'icloud'
+
+// Initialize CloudKit if configured
+if (isCloudKitConfigured) {
+  CloudKit.configure({
+    containers: [{
+      containerIdentifier: cloudKitConfig.containerIdentifier,
+      apiTokenAuth: {
+        apiToken: cloudKitConfig.apiToken,
+        persist: true
+      },
+      environment: cloudKitConfig.environment
+    }]
+  });
+  
+  cloudKitContainer = CloudKit.getDefaultContainer();
+  cloudKitDatabase = cloudKitContainer.privateCloudDatabase;
+  
+  // Check if user is already signed in
+  cloudKitContainer.whenUserSignsIn()
+    .then(function(userIdentity) {
+      currentUser = userIdentity;
+      syncMode = 'icloud';
+      updateSyncStatus();
+      loadFromCloudKit();
+    })
+    .catch(function() {
+      // Not signed in, stay in guest mode
+      syncMode = 'guest';
+      updateSyncStatus();
+      loadFromLocalStorage();
+    });
+} else {
+  console.log('ℹ️ CloudKit not configured. Using guest mode (localStorage).');
+  syncMode = 'guest';
+  updateSyncStatus();
+  loadFromLocalStorage();
+}
+
+// Sign in with Apple
+function signInWithApple() {
+  if (!isCloudKitConfigured) {
+    alert('CloudKit is not configured yet. App will work in Guest mode.');
+    return;
+  }
+  
+  cloudKitContainer.setUpAuth()
+    .then(function(userIdentity) {
+      if (userIdentity) {
+        currentUser = userIdentity;
+        syncMode = 'icloud';
+        updateSyncStatus();
+        
+        // Migrate guest data to iCloud
+        const guestScores = scores;
+        const guestSkipped = skippedCards;
+        
+        saveToCloudKit().then(function() {
+          alert('✅ Signed in! Your progress is now syncing with iCloud.');
+          localStorage.removeItem('flashcards_scores');
+          localStorage.removeItem('flashcards_skipped');
+        });
+      }
+    })
+    .catch(function(error) {
+      console.error('Sign in error:', error);
+      alert('Sign in failed. Check console for details.');
+    });
+}
+
+// Sign out
+function signOut() {
+  if (confirm('Sign out of iCloud? Your progress will be saved locally as a guest.')) {
+    // Save current progress to localStorage before signing out
+    saveToLocalStorage();
+    
+    cloudKitContainer.signOut()
+      .then(function() {
+        currentUser = null;
+        syncMode = 'guest';
+        updateSyncStatus();
+        alert('✅ Signed out. Continuing in Guest mode.');
+      });
+  }
+}
+
+// Update UI to show sync status
+function updateSyncStatus() {
+  let statusEl = document.getElementById('syncStatus');
+  if (!statusEl) {
+    // Create status indicator
+    statusEl = document.createElement('div');
+    statusEl.id = 'syncStatus';
+    statusEl.style.cssText = 'position:fixed;top:10px;right:10px;background:white;padding:8px 16px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:0.85rem;font-weight:600;z-index:1000;display:flex;gap:8px;align-items:center;';
+    document.body.appendChild(statusEl);
+  }
+  
+  if (syncMode === 'icloud' && currentUser) {
+    statusEl.innerHTML = '☁️ iCloud <button onclick="signOut()" style="margin-left:8px;padding:2px 8px;border-radius:12px;border:1px solid #ccc;background:white;cursor:pointer;font-size:0.75rem;">Sign Out</button>';
+  } else {
+    statusEl.innerHTML = '👤 Guest <button onclick="signInWithApple()" style="margin-left:8px;padding:2px 8px;border-radius:12px;border:none;background:#000;color:white;cursor:pointer;font-size:0.75rem;">Sign in with Apple</button>';
+  }
+}
+
+// Save to CloudKit
+function saveToCloudKit() {
+  if (syncMode !== 'icloud' || !currentUser) {
+    return Promise.resolve();
+  }
+  
+  const record = {
+    recordType: 'Progress',
+    recordName: 'user_progress',
+    fields: {
+      scores: { value: JSON.stringify(scores) },
+      skippedCards: { value: JSON.stringify(skippedCards) },
+      lastUpdated: { value: new Date().toISOString() }
+    }
+  };
+  
+  return cloudKitDatabase.saveRecords(record)
+    .then(function(response) {
+      if (response.records && response.records.length > 0) {
+        console.log('💾 Saved to iCloud');
+      }
+    })
+    .catch(function(error) {
+      console.error('CloudKit save error:', error);
+    });
+}
+
+// Load from CloudKit
+function loadFromCloudKit() {
+  if (syncMode !== 'icloud' || !currentUser) {
+    return;
+  }
+  
+  const query = {
+    recordType: 'Progress',
+    filterBy: [{
+      fieldName: 'recordName',
+      comparator: 'EQUALS',
+      fieldValue: { value: 'user_progress' }
+    }]
+  };
+  
+  cloudKitDatabase.performQuery(query)
+    .then(function(response) {
+      if (response.records && response.records.length > 0) {
+        const record = response.records[0];
+        
+        if (record.fields.scores) {
+          scores = JSON.parse(record.fields.scores.value);
+        }
+        if (record.fields.skippedCards) {
+          skippedCards = JSON.parse(record.fields.skippedCards.value);
+        }
+        
+        updateStats();
+        console.log('📥 Loaded from iCloud');
+        
+        const fb = document.getElementById('feedbackStrip');
+        fb.textContent = '☁️ Progress loaded from iCloud';
+        fb.className = 'feedback-strip correct-strip show';
+        setTimeout(function() {
+          fb.className = 'feedback-strip';
+        }, 2000);
+      }
+    })
+    .catch(function(error) {
+      console.error('CloudKit load error:', error);
+    });
+}
+
+// Save to localStorage (Guest mode)
+function saveToLocalStorage() {
+  try {
+    localStorage.setItem('flashcards_scores', JSON.stringify(scores));
+    localStorage.setItem('flashcards_skipped', JSON.stringify(skippedCards));
+    console.log('💾 Saved to local device');
+  } catch (e) {
+    console.error('localStorage error:', e);
+  }
+}
+
+// Load from localStorage (Guest mode)
+function loadFromLocalStorage() {
+  try {
+    const savedScores = localStorage.getItem('flashcards_scores');
+    const savedSkipped = localStorage.getItem('flashcards_skipped');
+    
+    if (savedScores) {
+      scores = JSON.parse(savedScores);
+    }
+    if (savedSkipped) {
+      skippedCards = JSON.parse(savedSkipped);
+    }
+    
+    if (savedScores || savedSkipped) {
+      updateStats();
+      console.log('📥 Loaded from local device');
+    }
+  } catch (e) {
+    console.error('localStorage error:', e);
+  }
+}
+
+// Auto-save wrapper
+function autoSave() {
+  if (syncMode === 'icloud') {
+    saveToCloudKit();
+  } else {
+    saveToLocalStorage();
+  }
+}
+
+// Wrap existing functions to add auto-save
+window.addEventListener('load', function() {
+  const originalCheckAnswer = checkAnswer;
+  checkAnswer = function() {
+    originalCheckAnswer();
+    autoSave();
+  };
+
+  const originalSkipCard = skipCard;
+  skipCard = function() {
+    originalSkipCard();
+    autoSave();
+  };
+
+  const originalMarkScore = markScore;
+  markScore = function(correct) {
+    originalMarkScore(correct);
+    autoSave();
+  };
+  
+  updateSyncStatus();
+});
+
+console.log('☁️ CloudKit + Guest mode ready');
+</script>
+
 </body>
 </html>
