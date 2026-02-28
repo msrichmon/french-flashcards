@@ -841,6 +841,7 @@ h1 span { color: var(--accent1); }
 // ============================================================================
 // Get these from: Firebase Console → Project Settings → Your apps → Web app
 // ============================================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyBDzhOLlGfD0-XJCGDi1D_RFGo9N5b_5A8",
   authDomain: "french-flashcards-bba40.firebaseapp.com",
@@ -854,109 +855,122 @@ const firebaseConfig = {
 // FIREBASE INITIALIZATION - DO NOT EDIT BELOW THIS LINE
 // ============================================================================
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+// Check if Firebase config has been updated
+const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY_HERE";
 
-let userId = null;
-let firebaseReady = false;
+if (!isFirebaseConfigured) {
+  console.log('ℹ️ Firebase not configured yet. App will work without sync.');
+  console.log('💡 To enable cloud sync, follow instructions in FIREBASE-QUICK-START.md');
+} else {
+  // Initialize Firebase only if configured
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
 
-// Sign in anonymously (creates a unique ID for this user)
-auth.signInAnonymously()
-  .then(() => {
-    userId = auth.currentUser.uid;
-    firebaseReady = true;
-    console.log('✅ Firebase connected. User ID:', userId);
-    loadProgressFromFirebase();
-  })
-  .catch((error) => {
-    console.error('❌ Firebase auth error:', error.message);
-    console.log('💡 App will work without sync. Check Firebase setup.');
+  let userId = null;
+  let firebaseReady = false;
+
+  // Sign in anonymously (creates a unique ID for this user)
+  auth.signInAnonymously()
+    .then(() => {
+      userId = auth.currentUser.uid;
+      firebaseReady = true;
+      console.log('✅ Firebase connected. User ID:', userId);
+      loadProgressFromFirebase();
+    })
+    .catch((error) => {
+      console.error('❌ Firebase auth error:', error.message);
+      console.log('💡 Check: Anonymous auth enabled in Firebase Console');
+    });
+
+  // Save progress to Firebase
+  window.saveProgressToFirebase = function() {
+    if (!firebaseReady || !userId) {
+      return;
+    }
+    
+    const progressData = {
+      scores: scores,
+      skippedCards: skippedCards,
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+      totalCards: cards.length
+    };
+    
+    db.collection('users').doc(userId).set(progressData, { merge: true })
+      .then(() => {
+        console.log('💾 Progress saved to Firebase');
+      })
+      .catch((error) => {
+        console.error('❌ Save error:', error.message);
+      });
+  };
+
+  // Load progress from Firebase
+  function loadProgressFromFirebase() {
+    if (!userId) return;
+    
+    db.collection('users').doc(userId).get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          
+          // Restore scores and skipped cards
+          if (data.scores) {
+            scores = data.scores;
+          }
+          if (data.skippedCards) {
+            skippedCards = data.skippedCards;
+          }
+          
+          updateStats();
+          console.log('📥 Progress loaded from Firebase');
+          
+          // Show a brief notification
+          const fb = document.getElementById('feedbackStrip');
+          fb.textContent = '✅ Progress synced from cloud';
+          fb.className = 'feedback-strip correct-strip show';
+          setTimeout(() => {
+            fb.className = 'feedback-strip';
+          }, 2000);
+        } else {
+          console.log('📝 No saved progress found (new user)');
+        }
+      })
+      .catch((error) => {
+        console.error('❌ Load error:', error.message);
+      });
+  }
+
+  // Wrap existing functions to add auto-save
+  // Wait for DOM to be ready
+  window.addEventListener('load', function() {
+    if (typeof checkAnswer !== 'undefined') {
+      const originalCheckAnswer = checkAnswer;
+      checkAnswer = function() {
+        originalCheckAnswer();
+        if (window.saveProgressToFirebase) window.saveProgressToFirebase();
+      };
+    }
+
+    if (typeof skipCard !== 'undefined') {
+      const originalSkipCard = skipCard;
+      skipCard = function() {
+        originalSkipCard();
+        if (window.saveProgressToFirebase) window.saveProgressToFirebase();
+      };
+    }
+
+    if (typeof markScore !== 'undefined') {
+      const originalMarkScore = markScore;
+      markScore = function(correct) {
+        originalMarkScore(correct);
+        if (window.saveProgressToFirebase) window.saveProgressToFirebase();
+      };
+    }
   });
 
-// Save progress to Firebase
-function saveProgressToFirebase() {
-  if (!firebaseReady || !userId) {
-    console.log('⏸️ Firebase not ready, skipping save');
-    return;
-  }
-  
-  const progressData = {
-    scores: scores,
-    skippedCards: skippedCards,
-    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-    totalCards: cards.length
-  };
-  
-  db.collection('users').doc(userId).set(progressData, { merge: true })
-    .then(() => {
-      console.log('💾 Progress saved to Firebase');
-    })
-    .catch((error) => {
-      console.error('❌ Save error:', error.message);
-    });
+  console.log('🔥 Firebase integration active');
 }
-
-// Load progress from Firebase
-function loadProgressFromFirebase() {
-  if (!userId) return;
-  
-  db.collection('users').doc(userId).get()
-    .then((doc) => {
-      if (doc.exists) {
-        const data = doc.data();
-        
-        // Restore scores and skipped cards
-        if (data.scores) {
-          scores = data.scores;
-        }
-        if (data.skippedCards) {
-          skippedCards = data.skippedCards;
-        }
-        
-        updateStats();
-        console.log('📥 Progress loaded from Firebase');
-        
-        // Show a brief notification
-        const fb = document.getElementById('feedbackStrip');
-        fb.textContent = '✅ Progress synced from cloud';
-        fb.className = 'feedback-strip correct-strip show';
-        setTimeout(() => {
-          fb.className = 'feedback-strip';
-        }, 2000);
-      } else {
-        console.log('📝 No saved progress found (new user)');
-      }
-    })
-    .catch((error) => {
-      console.error('❌ Load error:', error.message);
-    });
-}
-
-// Override the existing functions to add auto-save
-// We need to wrap them to add saveProgressToFirebase() calls
-
-const originalCheckAnswer = checkAnswer;
-checkAnswer = function() {
-  originalCheckAnswer();
-  saveProgressToFirebase();
-};
-
-const originalSkipCard = skipCard;
-skipCard = function() {
-  originalSkipCard();
-  saveProgressToFirebase();
-};
-
-// For flip mode
-const originalMarkScore = markScore;
-markScore = function(correct) {
-  originalMarkScore(correct);
-  saveProgressToFirebase();
-};
-
-console.log('🔥 Firebase integration loaded');
 </script>
 
 </body>
