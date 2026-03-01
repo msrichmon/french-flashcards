@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>French Flashcards</title>
-    <script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>French Flashcards</title>
+<script>
         // Check if there are existing flashcards in localStorage
         const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
 
@@ -27,9 +28,829 @@
             });
         };
     </script>
+<style>
+:root {
+  --bg: #FFF8F0;
+  --card-back: #3A5A8C;
+  --accent1: #FF6B6B;
+  --accent2: #FFD166;
+  --accent3: #06D6A0;
+  --accent4: #118AB2;
+  --text-dark: #2D2D2D;
+  --shadow: 0 8px 32px rgba(58, 90, 140, 0.18);
+  --radius: 24px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 60px;
+}
+header { text-align: center; margin-bottom: 28px; }
+.flag { font-size: 2.5rem; margin-bottom: 4px; display: block; }
+h1 { font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--card-back); line-height: 1.1; }
+h1 span { color: var(--accent1); }
+.subtitle { font-size: 0.95rem; color: #7A8BA0; margin-top: 4px; font-weight: 600; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.7); border-radius: 50px; padding: 5px; }
+.tab { padding: 8px 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #7A8BA0; }
+.tab.active { background: var(--card-back); color: white; }
+
+.top-controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+.pill-btn { padding: 7px 16px; border-radius: 40px; border: 2px solid rgba(58,90,140,0.2); font-weight: 700; font-size: 0.85rem; cursor: pointer; background: transparent; color: #7A8BA0; }
+.pill-btn.active { background: var(--accent2); border-color: var(--accent2); color: var(--text-dark); }
+
+.progress-bar { width: 100%; max-width: 480px; height: 8px; background: rgba(58,90,140,0.15); border-radius: 10px; margin-bottom: 10px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent4)); border-radius: 10px; transition: width 0.4s ease; }
+.progress-text { font-size: 0.82rem; color: #7A8BA0; font-weight: 700; margin-bottom: 20px; }
+
+.review-banner { width: 100%; max-width: 420px; background: linear-gradient(135deg, var(--accent1), #E74C3C); color: white; border-radius: 16px; padding: 12px 20px; margin-bottom: 16px; text-align: center; font-weight: 700; font-size: 0.95rem; display: none; gap: 8px; }
+.review-banner.show { display: flex; align-items: center; justify-content: center; }
+.review-banner button { background: rgba(255,255,255,0.25); border: none; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+
+.card-area { width: 100%; max-width: 420px; min-height: 220px; margin-bottom: 24px; background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); border: 3px solid rgba(58,90,140,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.card-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #B0BFCF; margin-bottom: 14px; }
+.card-word { font-weight: 800; font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--card-back); text-align: center; line-height: 1.1; }
+.card-hint { font-size: 0.78rem; color: #C5D0DC; margin-top: 16px; font-weight: 600; }
+.card-example { font-size: 0.85rem; color: #7A8BA0; margin-top: 12px; font-style: italic; text-align: center; line-height: 1.4; max-width: 100%; }
+
+.result-overlay { position: absolute; inset: 0; border-radius: calc(var(--radius) - 3px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.result-overlay.show { opacity: 1; pointer-events: auto; }
+.result-overlay.correct-overlay { background: rgba(6,214,160,0.95); }
+.result-overlay.wrong-overlay { background: rgba(255,107,107,0.95); }
+.result-icon { font-size: 2.2rem; margin-bottom: 6px; }
+.result-msg { font-weight: 800; font-size: 1.3rem; color: white; text-align: center; }
+.result-answer { font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-top: 6px; font-weight: 700; text-align: center; }
+.result-example { font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-top: 8px; font-style: italic; text-align: center; line-height: 1.3; }
+
+.type-area { width: 100%; max-width: 420px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+.input-row { display: flex; gap: 10px; }
+.answer-input { flex: 1; padding: 14px 20px; border-radius: 50px; border: 2.5px solid rgba(58,90,140,0.2); background: white; font-size: 1.1rem; font-weight: 600; color: var(--text-dark); outline: none; }
+.answer-input:focus { border-color: var(--card-back); }
+.answer-input.correct-input { border-color: var(--accent3); background: rgba(6,214,160,0.07); }
+.answer-input.wrong-input { border-color: var(--accent1); background: rgba(255,107,107,0.07); }
+.answer-input:disabled { opacity: 0.7; }
+
+.btn-check { padding: 14px 22px; border-radius: 50px; border: none; background: var(--card-back); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; white-space: nowrap; -webkit-appearance: none; -webkit-tap-highlight-color: transparent; }
+.btn-check:disabled { opacity: 0.4; }
+
+.accent-bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 16px; }
+.accent-btn { padding: 5px 11px; border-radius: 20px; border: 1.5px solid rgba(58,90,140,0.2); background: white; font-size: 0.95rem; font-weight: 700; color: var(--card-back); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+.feedback-strip { width: 100%; max-width: 420px; border-radius: 16px; padding: 12px 20px; margin-bottom: 14px; text-align: center; font-weight: 700; font-size: 1rem; opacity: 0; transition: opacity 0.3s; }
+.feedback-strip.show { opacity: 1; }
+.feedback-strip.correct-strip { background: rgba(6,214,160,0.15); color: #028A6A; }
+.feedback-strip.wrong-strip { background: rgba(255,107,107,0.15); color: #C0392B; }
+
+.btn-next { padding: 13px 32px; background: var(--accent3); color: white; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 20px; display: none; -webkit-tap-highlight-color: transparent; }
+.btn-next.show { display: block; }
+
+.btn-skip { padding: 11px 24px; background: rgba(58,90,140,0.1); color: var(--card-back); border: 2px solid rgba(58,90,140,0.2); border-radius: 50px; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-bottom: 20px; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.btn-skip:hover { background: rgba(58,90,140,0.15); }
+
+.stats { display: flex; gap: 20px; background: white; border-radius: 20px; padding: 14px 28px; margin-bottom: 20px; }
+.stat { text-align: center; }
+.stat-num { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.stat-num.green { color: var(--accent3); }
+.stat-num.red { color: var(--accent1); }
+.stat-num.blue { color: var(--accent4); }
+.stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B0BFCF; margin-top: 2px; }
+.stat-divider { width: 1px; background: rgba(0,0,0,0.08); }
+
+.bottom-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn-shuffle { padding: 10px 22px; background: rgba(58,90,140,0.08); color: var(--card-back); border-radius: 50px; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.btn-review { padding: 10px 22px; background: var(--accent1); color: white; border-radius: 50px; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.btn-review:disabled { opacity: 0.4; }
+</style>
 </head>
 <body>
-    <h1>French Flashcards</h1>
-    <!-- Your flashcard UI goes here -->
+
+<header>
+  <span class="flag">🇫🇷</span>
+  <h1>Apprends le <span>Français</span>!</h1>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-all">🃏 All Words</button>
+  <button class="tab" id="tab-visage">😊 Le Visage</button>
+  <button class="tab" id="tab-corps">🧍 Le Corps</button>
+  <button class="tab" id="tab-prepositions">📍 Prepositions</button>
+  <button class="tab" id="tab-conjugations">🔄 Conjugations</button>
+</div>
+
+<div class="top-controls">
+  <button class="pill-btn active" id="mode-fr">🇫🇷 → 🇬🇧</button>
+  <button class="pill-btn" id="mode-en">🇬🇧 → 🇫🇷</button>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-text" id="progressText">Card 1 of 169</div>
+
+<div class="review-banner" id="reviewBanner">
+  🔁 Reviewing missed words only
+  <button id="exitReviewBtn">Exit Review</button>
+</div>
+
+<div class="card-area">
+  <div class="card-label" id="frontLabel">FRENCH</div>
+  <div class="card-word" id="frontWord">les cheveux</div>
+  <div class="card-example" id="cardExample"></div>
+  <div class="card-hint">✏️ Type your answer below</div>
+  <div class="result-overlay" id="resultOverlay">
+    <div class="result-icon" id="resultIcon">✓</div>
+    <div class="result-msg" id="resultMsg">Correct!</div>
+    <div class="result-answer" id="resultAnswer"></div>
+    <div class="result-example" id="resultExample"></div>
+  </div>
+</div>
+
+<div class="type-area">
+  <div class="input-row">
+    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+    <button class="btn-check" id="checkBtn">Check ↵</button>
+  </div>
+  <div class="accent-bar" id="accentBar"></div>
+</div>
+
+<div class="feedback-strip" id="feedbackStrip"></div>
+<button class="btn-next" id="nextBtn">Next card →</button>
+<button class="btn-skip" id="skipBtn">Skip →</button>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num green" id="statCorrect">0</div><div class="stat-label">Correct</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">169</div><div class="stat-label">Remaining</div></div>
+</div>
+
+<div class="bottom-actions">
+  <button class="btn-shuffle" id="shuffleBtn">🔀 Shuffle Cards</button>
+  <button class="btn-review" id="reviewBtn" disabled>📖 Review Missed</button>
+  <button class="btn-review" id="reviewSkippedBtn" disabled>⏭️ Review Skipped</button>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  const allCards = [
+    { fr: "les cheveux", en: "the hair", emoji: "💇", category: "visage" },
+    { fr: "le front", en: "the forehead", emoji: "😊", category: "visage" },
+    { fr: "les sourcils", en: "the eyebrows", emoji: "🤨", category: "visage" },
+    { fr: "les yeux", en: "the eyes", emoji: "👁️", category: "visage" },
+    { fr: "les cils", en: "the eyelashes", emoji: "😉", category: "visage" },
+    { fr: "les oreilles", en: "the ears", emoji: "👂", category: "visage" },
+    { fr: "le nez", en: "the nose", emoji: "👃", category: "visage" },
+    { fr: "les narines", en: "the nostrils", emoji: "👃", category: "visage" },
+    { fr: "les joues", en: "the cheeks", emoji: "😊", category: "visage" },
+    { fr: "la bouche", en: "the mouth", emoji: "👄", category: "visage" },
+    { fr: "les lèvres", en: "the lips", emoji: "💋", category: "visage" },
+    { fr: "les dents", en: "the teeth", emoji: "🦷", category: "visage" },
+    { fr: "le menton", en: "the chin", emoji: "🧏", category: "visage" },
+    { fr: "la tête", en: "the head", emoji: "🧠", category: "corps" },
+    { fr: "le cou", en: "the neck", emoji: "🧣", category: "corps" },
+    { fr: "le dos", en: "the back", emoji: "🔙", category: "corps" },
+    { fr: "les épaules", en: "the shoulders", emoji: "💪", category: "corps" },
+    { fr: "le bras", en: "the arm", emoji: "💪", category: "corps" },
+    { fr: "le coude", en: "the elbow", emoji: "🦾", category: "corps" },
+    { fr: "la poitrine", en: "the chest", emoji: "🫀", category: "corps" },
+    { fr: "le nombril", en: "the belly button", emoji: "🎯", category: "corps" },
+    { fr: "le poignet", en: "the wrist", emoji: "⌚", category: "corps" },
+    { fr: "la main", en: "the hand", emoji: "✋", category: "corps" },
+    { fr: "les doigts", en: "the fingers", emoji: "🖐️", category: "corps" },
+    { fr: "le ventre", en: "the belly", emoji: "🫃", category: "corps" },
+    { fr: "les fesses", en: "the buttocks", emoji: "🍑", category: "corps" },
+    { fr: "la jambe", en: "the leg", emoji: "🦵", category: "corps" },
+    { fr: "la cuisse", en: "the thigh", emoji: "🦵", category: "corps" },
+    { fr: "le genou", en: "the knee", emoji: "🦵", category: "corps" },
+    { fr: "le mollet", en: "the calf", emoji: "🦵", category: "corps" },
+    { fr: "la cheville", en: "the ankle", emoji: "🦶", category: "corps" },
+    { fr: "le pied", en: "the foot", emoji: "🦶", category: "corps" },
+    { fr: "le talon", en: "the heel", emoji: "👠", category: "corps" },
+    { fr: "les orteils", en: "the toes", emoji: "🦶", category: "corps" },
+    { fr: "le pouce", en: "the thumb", emoji: "👍", category: "corps" },
+    { fr: "l'index", en: "the index finger", emoji: "☝️", category: "corps" },
+    { fr: "le majeur", en: "the middle finger", emoji: "🖕", category: "corps" },
+    { fr: "l'annulaire", en: "the ring finger", emoji: "💍", category: "corps" },
+    { fr: "l'auriculaire", en: "the little finger", emoji: "🤙", category: "corps" },
+    // Prepositions
+    { fr: "à", en: "to, at", emoji: "➡️", category: "prepositions", example: "Je vais à Paris • Je suis à la maison", exampleEn: "I'm going to Paris • I'm at home" },
+    { fr: "de", en: "of, from", emoji: "⬅️", category: "prepositions", example: "Le livre de Marie • Je viens de France", exampleEn: "Marie's book (book of Marie) • I come from France" },
+    { fr: "dans", en: "in", emoji: "📦", category: "prepositions", example: "Le chat est dans la boîte", exampleEn: "The cat is in the box" },
+    { fr: "sur", en: "on", emoji: "🔝", category: "prepositions", example: "Le livre est sur la table", exampleEn: "The book is on the table" },
+    { fr: "sous", en: "under", emoji: "⬇️", category: "prepositions", example: "Le chien est sous la table", exampleEn: "The dog is under the table" },
+    { fr: "avec", en: "with", emoji: "🤝", category: "prepositions", example: "Je vais avec mon ami", exampleEn: "I'm going with my friend" },
+    { fr: "sans", en: "without", emoji: "🚫", category: "prepositions", example: "Un café sans sucre", exampleEn: "A coffee without sugar" },
+    { fr: "pour", en: "for", emoji: "🎁", category: "prepositions", example: "C'est pour toi", exampleEn: "It's for you" },
+    { fr: "par", en: "by, through", emoji: "🚪", category: "prepositions", example: "Écrit par Paul • Je passe par le parc", exampleEn: "Written by Paul • I go through the park" },
+    { fr: "entre", en: "between", emoji: "↔️", category: "prepositions", example: "Entre toi et moi", exampleEn: "Between you and me" },
+    { fr: "derrière", en: "behind", emoji: "👈", category: "prepositions", example: "Derrière la maison", exampleEn: "Behind the house" },
+    { fr: "devant", en: "in front of", emoji: "👉", category: "prepositions", example: "Devant l'école", exampleEn: "In front of the school" },
+    { fr: "chez", en: "at, at someone's place, at someone's house, at Marie's", emoji: "🏠", category: "prepositions", example: "Je suis chez Marie", exampleEn: "I'm at Marie's place / at Marie's" },
+    { fr: "vers", en: "towards", emoji: "🎯", category: "prepositions", example: "Je marche vers la gare", exampleEn: "I'm walking towards the station" },
+    { fr: "pendant", en: "during", emoji: "⏰", category: "prepositions", example: "Pendant les vacances", exampleEn: "During the holidays" },
+    { fr: "avant", en: "before", emoji: "⏮️", category: "prepositions", example: "Avant le dîner", exampleEn: "Before dinner" },
+    { fr: "après", en: "after", emoji: "⏭️", category: "prepositions", example: "Après le film", exampleEn: "After the movie" },
+    { fr: "contre", en: "against", emoji: "🛡️", category: "prepositions", example: "Contre le mur", exampleEn: "Against the wall" },
+    { fr: "parmi", en: "among", emoji: "👥", category: "prepositions", example: "Parmi mes amis", exampleEn: "Among my friends" },
+    { fr: "en", en: "in", emoji: "📍", category: "prepositions", example: "En France • En voiture • En deux heures", exampleEn: "In France • By car • In two hours" },
+    { fr: "depuis", en: "since, from", emoji: "📅", category: "prepositions", example: "J'habite ici depuis 2020 • Depuis Paris", exampleEn: "I've lived here since 2020 • From Paris" },
+    { fr: "jusque", en: "until, up to", emoji: "⏱️", category: "prepositions", example: "Jusqu'à demain • Jusqu'à Paris", exampleEn: "Until tomorrow • Up to Paris" },
+    { fr: "près de", en: "near", emoji: "📍", category: "prepositions", example: "Près de la gare", exampleEn: "Near the station" },
+    { fr: "loin de", en: "far from", emoji: "🏃", category: "prepositions", example: "Loin de Paris", exampleEn: "Far from Paris" },
+    { fr: "autour de", en: "around", emoji: "🔄", category: "prepositions", example: "Autour de la table", exampleEn: "Around the table" },
+    { fr: "dès", en: "from, as early as", emoji: "⏰", category: "prepositions", example: "Dès demain • Dès maintenant", exampleEn: "From tomorrow • From now" },
+    { fr: "durant", en: "during", emoji: "⌚", category: "prepositions", example: "Durant l'été", exampleEn: "During the summer" },
+    { fr: "malgré", en: "despite", emoji: "💪", category: "prepositions", example: "Malgré la pluie", exampleEn: "Despite the rain" },
+    { fr: "sauf", en: "except", emoji: "➖", category: "prepositions", example: "Tous sauf Marie", exampleEn: "Everyone except Marie" },
+    { fr: "selon", en: "according to", emoji: "📰", category: "prepositions", example: "Selon Paul", exampleEn: "According to Paul" },
+    { fr: "envers", en: "towards", emoji: "💗", category: "prepositions", example: "Gentil envers les autres", exampleEn: "Kind towards others" },
+    { fr: "grâce à", en: "thanks to", emoji: "🙏", category: "prepositions", example: "Grâce à toi", exampleEn: "Thanks to you" },
+    { fr: "à cause de", en: "because of", emoji: "❓", category: "prepositions", example: "À cause de la pluie", exampleEn: "Because of the rain" },
+    { fr: "au lieu de", en: "instead of", emoji: "🔀", category: "prepositions", example: "Au lieu de partir", exampleEn: "Instead of leaving" },
+    { fr: "à côté de", en: "next to, beside", emoji: "👫", category: "prepositions", example: "À côté de Marie", exampleEn: "Next to Marie" },
+    { fr: "en face de", en: "across from, opposite", emoji: "↔️", category: "prepositions", example: "En face de l'école", exampleEn: "Across from the school" },
+    { fr: "au-dessus de", en: "above", emoji: "⬆️", category: "prepositions", example: "Au-dessus de la table", exampleEn: "Above the table" },
+    { fr: "au-dessous de", en: "below", emoji: "⬇️", category: "prepositions", example: "Au-dessous de zéro", exampleEn: "Below zero" },
+    // Conjugations - ÊTRE (to be)
+    { fr: "je suis", en: "I am", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "tu es", en: "you are (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "il/elle est", en: "he/she is", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "nous sommes", en: "we are", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "vous êtes", en: "you are (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "ils/elles sont", en: "they are", emoji: "👥", category: "conjugations", verb: "être", tense: "présent" },
+    { fr: "j'étais", en: "I was", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "tu étais", en: "you were (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "il/elle était", en: "he/she was", emoji: "👤", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "nous étions", en: "we were", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "vous étiez", en: "you were (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "ils/elles étaient", en: "they were", emoji: "👥", category: "conjugations", verb: "être", tense: "imparfait" },
+    { fr: "je vais être", en: "I am going to be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "tu vas être", en: "you are going to be (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "il/elle va être", en: "he/she is going to be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "nous allons être", en: "we are going to be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "vous allez être", en: "you are going to be (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "ils/elles vont être", en: "they are going to be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur proche" },
+    { fr: "je serai", en: "I will be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "tu seras", en: "you will be (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "il/elle sera", en: "he/she will be", emoji: "👤", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "nous serons", en: "we will be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "vous serez", en: "you will be (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "ils/elles seront", en: "they will be", emoji: "👥", category: "conjugations", verb: "être", tense: "futur" },
+    { fr: "j'ai été", en: "I was, I have been", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "tu as été", en: "you were, you have been (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "il/elle a été", en: "he/she was, he/she has been", emoji: "👤", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "nous avons été", en: "we were, we have been", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "vous avez été", en: "you were, you have been (formal/plural)", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    { fr: "ils/elles ont été", en: "they were, they have been", emoji: "👥", category: "conjugations", verb: "être", tense: "passé composé" },
+    // Conjugations - AVOIR (to have)
+    { fr: "j'ai", en: "I have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "tu as", en: "you have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "il/elle a", en: "he/she has", emoji: "👤", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "nous avons", en: "we have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "vous avez", en: "you have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "ils/elles ont", en: "they have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "présent" },
+    { fr: "j'avais", en: "I had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "tu avais", en: "you had (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "il/elle avait", en: "he/she had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "nous avions", en: "we had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "vous aviez", en: "you had (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "ils/elles avaient", en: "they had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "imparfait" },
+    { fr: "je vais avoir", en: "I am going to have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "tu vas avoir", en: "you are going to have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "il/elle va avoir", en: "he/she is going to have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "nous allons avoir", en: "we are going to have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "vous allez avoir", en: "you are going to have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "ils/elles vont avoir", en: "they are going to have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur proche" },
+    { fr: "j'aurai", en: "I will have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "tu auras", en: "you will have (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "il/elle aura", en: "he/she will have", emoji: "👤", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "nous aurons", en: "we will have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "vous aurez", en: "you will have (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "ils/elles auront", en: "they will have", emoji: "👥", category: "conjugations", verb: "avoir", tense: "futur" },
+    { fr: "j'ai eu", en: "I had, I have had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "tu as eu", en: "you had, you have had (informal)", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "il/elle a eu", en: "he/she had, he/she has had", emoji: "👤", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "nous avons eu", en: "we had, we have had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "vous avez eu", en: "you had, you have had (formal/plural)", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    { fr: "ils/elles ont eu", en: "they had, they have had", emoji: "👥", category: "conjugations", verb: "avoir", tense: "passé composé" },
+    // Conjugations - ALLER (to go)
+    { fr: "je vais", en: "I go, I am going", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "tu vas", en: "you go, you are going (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "il/elle va", en: "he/she goes, he/she is going", emoji: "👤", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "nous allons", en: "we go, we are going", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "vous allez", en: "you go, you are going (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "ils/elles vont", en: "they go, they are going", emoji: "👥", category: "conjugations", verb: "aller", tense: "présent" },
+    { fr: "j'allais", en: "I was going", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "tu allais", en: "you were going (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "il/elle allait", en: "he/she was going", emoji: "👤", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "nous allions", en: "we were going", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "vous alliez", en: "you were going (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "ils/elles allaient", en: "they were going", emoji: "👥", category: "conjugations", verb: "aller", tense: "imparfait" },
+    { fr: "je vais aller", en: "I am going to go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "tu vas aller", en: "you are going to go (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "il/elle va aller", en: "he/she is going to go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "nous allons aller", en: "we are going to go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "vous allez aller", en: "you are going to go (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "ils/elles vont aller", en: "they are going to go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur proche" },
+    { fr: "j'irai", en: "I will go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "tu iras", en: "you will go (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "il/elle ira", en: "he/she will go", emoji: "👤", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "nous irons", en: "we will go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "vous irez", en: "you will go (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "ils/elles iront", en: "they will go", emoji: "👥", category: "conjugations", verb: "aller", tense: "futur" },
+    { fr: "je suis allé(e)", en: "I went, I have gone", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "tu es allé(e)", en: "you went, you have gone (informal)", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "il/elle est allé(e)", en: "he/she went, he/she has gone", emoji: "👤", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "nous sommes allé(e)s", en: "we went, we have gone", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "vous êtes allé(e)(s)", en: "you went, you have gone (formal/plural)", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
+    { fr: "ils/elles sont allé(e)s", en: "they went, they have gone", emoji: "👥", category: "conjugations", verb: "aller", tense: "passé composé" },
+  ];
+
+  const FR_ACCENTS = ['à','â','ç','è','é','ê','ë','î','ï','ô','ù','û','ü','œ','æ'];
+
+  let cards = allCards.slice();
+  let current = 0;
+  let mode = 'fr';
+  let scores = {};
+  let answered = false;
+  let reviewMode = false;
+  let originalCards = [];
+  let skippedCards = {}; // Track which cards were skipped
+
+  function normalise(s) {
+    return s.trim().toLowerCase().replace(/['']/g, "'").replace(/\s+/g, ' ');
+  }
+  
+  function stripAccents(s) {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  
+  function isCorrect(userInput, target) {
+    const u = normalise(userInput);
+    let t = normalise(target);
+    
+    // Strip parenthetical notes like (informal), (formal/plural) from target
+    t = t.replace(/\s*\([^)]*\)/g, '');
+    
+    if (u === t) return true;
+    
+    // For multi-word answers (like "to, at" or "by, through"), accept either word
+    if (t.includes(',')) {
+      const options = t.split(',').map(function(opt) { return opt.trim(); });
+      for (var i = 0; i < options.length; i++) {
+        if (u === options[i]) return true;
+      }
+    }
+    
+    // Also check if user input contains commas (to handle "to,at" vs "to, at")
+    if (u.includes(',')) {
+      const userOptions = u.split(',').map(function(opt) { return opt.trim(); });
+      const targetOptions = t.split(',').map(function(opt) { return opt.trim(); });
+      // Check if user provided valid subset
+      var allValid = true;
+      for (var i = 0; i < userOptions.length; i++) {
+        var found = false;
+        for (var j = 0; j < targetOptions.length; j++) {
+          if (userOptions[i] === targetOptions[j]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          allValid = false;
+          break;
+        }
+      }
+      if (allValid && userOptions.length > 0) return true;
+    }
+    
+    if (mode === 'fr') {
+      const tNoThe = t.replace(/^the\s+/, '');
+      if (u === tNoThe) return true;
+    }
+    if (mode === 'en') {
+      if (stripAccents(u) === stripAccents(t)) return true;
+      const tNoArticle = t.replace(/^(le|la|les|l')\s*/i, '');
+      if (u === normalise(tNoArticle) || stripAccents(u) === stripAccents(tNoArticle)) return true;
+    }
+    return false;
+  }
+
+  function renderCard() {
+    const card = cards[current];
+    if (!card) return;
+    answered = false;
+
+    if (mode === 'fr') {
+      document.getElementById('frontLabel').textContent = 'FRENCH';
+      document.getElementById('frontWord').textContent = card.fr;
+    } else {
+      document.getElementById('frontLabel').textContent = 'ENGLISH';
+      document.getElementById('frontWord').textContent = card.en;
+    }
+
+    // Show example sentence based on mode to avoid giving away answers
+    // For French→English mode: show French example (doesn't reveal English answer)
+    // For English→French mode: show English example (doesn't reveal French answer)
+    const exampleEl = document.getElementById('cardExample');
+    if (card.example && card.exampleEn) {
+      if (mode === 'fr') {
+        // Show French example
+        exampleEl.textContent = card.example;
+        exampleEl.style.display = 'block';
+      } else {
+        // Show English example
+        exampleEl.textContent = card.exampleEn;
+        exampleEl.style.display = 'block';
+      }
+    } else {
+      exampleEl.textContent = '';
+      exampleEl.style.display = 'none';
+    }
+
+    const input = document.getElementById('answerInput');
+    input.value = '';
+    input.disabled = false;
+    input.className = 'answer-input';
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('resultOverlay').className = 'result-overlay';
+    document.getElementById('feedbackStrip').className = 'feedback-strip';
+    document.getElementById('nextBtn').classList.remove('show');
+
+    renderAccentBar();
+
+    const pct = ((current + 1) / cards.length) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = 'Card ' + (current + 1) + ' of ' + cards.length;
+
+    setTimeout(function() {
+      document.getElementById('answerInput').focus();
+    }, 100);
+  }
+
+  function renderAccentBar() {
+    const bar = document.getElementById('accentBar');
+    if (mode !== 'en') { 
+      bar.innerHTML = ''; 
+      return; 
+    }
+    bar.innerHTML = FR_ACCENTS.map(function(a) {
+      return '<button class="accent-btn" data-char="' + a + '">' + a + '</button>';
+    }).join('');
+    
+    // Add click handlers to accent buttons
+    var btns = bar.querySelectorAll('.accent-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].onclick = function() {
+        insertAccent(this.getAttribute('data-char'));
+      };
+    }
+  }
+
+  function insertAccent(char) {
+    const input = document.getElementById('answerInput');
+    if (input.disabled) return;
+    const s = input.selectionStart;
+    const e = input.selectionEnd;
+    input.value = input.value.slice(0, s) + char + input.value.slice(e);
+    input.selectionStart = input.selectionEnd = s + 1;
+    input.focus();
+  }
+
+  function checkAnswer() {
+    if (answered) { 
+      nextCard(); 
+      return; 
+    }
+    
+    const card = cards[current];
+    const input = document.getElementById('answerInput');
+    const userValue = input.value;
+    
+    if (!userValue.trim()) return;
+
+    const target = mode === 'fr' ? card.en : card.fr;
+    const correct = isCorrect(userValue, target);
+    
+    answered = true;
+    input.disabled = true;
+    document.getElementById('checkBtn').disabled = true;
+
+    // Clear skip status since card is now answered
+    delete skippedCards[current];
+
+    const overlay = document.getElementById('resultOverlay');
+    const fb = document.getElementById('feedbackStrip');
+    const resultExampleEl = document.getElementById('resultExample');
+
+    if (correct) {
+      input.classList.add('correct-input');
+      overlay.className = 'result-overlay correct-overlay show';
+      document.getElementById('resultIcon').textContent = '✓';
+      document.getElementById('resultMsg').textContent = 'Correct! 🎉';
+      document.getElementById('resultAnswer').textContent = target;
+      fb.textContent = '✓  "' + target + '"';
+      fb.className = 'feedback-strip correct-strip show';
+      scores[current] = true;
+    } else {
+      input.classList.add('wrong-input');
+      overlay.className = 'result-overlay wrong-overlay show';
+      document.getElementById('resultIcon').textContent = '✗';
+      document.getElementById('resultMsg').textContent = 'Not quite…';
+      document.getElementById('resultAnswer').textContent = 'Answer: ' + target;
+      fb.textContent = '✗  The answer was: "' + target + '"';
+      fb.className = 'feedback-strip wrong-strip show';
+      scores[current] = false;
+    }
+    
+    // Show example translation in result overlay
+    // If we showed French example, now show English translation
+    // If we showed English example, now show French translation
+    if (card.exampleEn && card.example) {
+      if (mode === 'fr') {
+        // Was showing French example, now show English
+        resultExampleEl.textContent = card.exampleEn;
+      } else {
+        // Was showing English example, now show French
+        resultExampleEl.textContent = card.example;
+      }
+      resultExampleEl.style.display = 'block';
+    } else {
+      resultExampleEl.textContent = '';
+      resultExampleEl.style.display = 'none';
+    }
+    
+    updateStats();
+    document.getElementById('nextBtn').classList.add('show');
+  }
+
+  function nextCard() {
+    if (current < cards.length - 1) {
+      current++;
+      renderCard();
+    } else {
+      const correct = Object.keys(scores).filter(function(k) { return scores[k] === true; }).length;
+      const fb = document.getElementById('feedbackStrip');
+      fb.textContent = '🎉 Deck complete! ' + correct + '/' + cards.length + ' correct. Shuffle to go again!';
+      fb.className = 'feedback-strip correct-strip show';
+      document.getElementById('nextBtn').classList.remove('show');
+    }
+  }
+
+  function skipCard() {
+    // Mark card as skipped
+    skippedCards[current] = true;
+    
+    // Skip without marking - just go to next card
+    if (current < cards.length - 1) {
+      current++;
+      renderCard();
+    }
+    
+    updateStats();
+  }
+
+  function updateStats() {
+    var correct = Object.keys(scores).filter(function(k) { return scores[k] === true; }).length;
+    var incorrect = Object.keys(scores).filter(function(k) { return scores[k] === false; }).length;
+    var skipped = Object.keys(skippedCards).length;
+    var remaining = Math.max(0, cards.length - Object.keys(scores).length - skipped);
+    
+    document.getElementById('statCorrect').textContent = correct;
+    document.getElementById('statIncorrect').textContent = incorrect;
+    document.getElementById('statRemaining').textContent = remaining;
+    
+    document.getElementById('reviewBtn').disabled = incorrect === 0;
+    document.getElementById('reviewSkippedBtn').disabled = skipped === 0;
+  }
+
+  function setCategory(cat) {
+    document.getElementById('tab-all').classList.toggle('active', cat === 'all');
+    document.getElementById('tab-visage').classList.toggle('active', cat === 'visage');
+    document.getElementById('tab-corps').classList.toggle('active', cat === 'corps');
+    document.getElementById('tab-prepositions').classList.toggle('active', cat === 'prepositions');
+    document.getElementById('tab-conjugations').classList.toggle('active', cat === 'conjugations');
+    
+    if (cat === 'all') {
+      cards = allCards.slice();
+    } else {
+      cards = allCards.filter(function(c) { return c.category === cat; });
+    }
+    
+    scores = {};
+    skippedCards = {};
+    current = 0;
+    reviewMode = false;
+    document.getElementById('reviewBanner').classList.remove('show');
+    renderCard();
+    updateStats();
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('mode-fr').classList.toggle('active', m === 'fr');
+    document.getElementById('mode-en').classList.toggle('active', m === 'en');
+    scores = {};
+    skippedCards = {};
+    current = 0;
+    reviewMode = false;
+    document.getElementById('reviewBanner').classList.remove('show');
+    renderCard();
+    updateStats();
+  }
+
+  function shuffleCards() {
+    if (reviewMode) {
+      cards = originalCards.slice();
+      reviewMode = false;
+      originalCards = [];
+      document.getElementById('reviewBanner').classList.remove('show');
+    }
+    
+    for (var i = cards.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = cards[i];
+      cards[i] = cards[j];
+      cards[j] = temp;
+    }
+    
+    scores = {};
+    skippedCards = {};
+    current = 0;
+    renderCard();
+    updateStats();
+  }
+
+  function reviewMissed() {
+    var missedIndices = [];
+    for (var k in scores) {
+      if (scores[k] === false) {
+        missedIndices.push(parseInt(k));
+      }
+    }
+    
+    if (missedIndices.length === 0) return;
+    
+    originalCards = cards.slice();
+    reviewMode = true;
+    
+    cards = missedIndices.map(function(idx) { return originalCards[idx]; });
+    
+    scores = {};
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.add('show');
+    
+    renderCard();
+    updateStats();
+  }
+
+  function reviewSkipped() {
+    var skippedIndices = [];
+    for (var k in skippedCards) {
+      if (skippedCards[k]) {
+        skippedIndices.push(parseInt(k));
+      }
+    }
+    
+    if (skippedIndices.length === 0) return;
+    
+    originalCards = cards.slice();
+    reviewMode = true;
+    
+    cards = skippedIndices.map(function(idx) { return originalCards[idx]; });
+    
+    // Clear skipped status for review
+    skippedCards = {};
+    scores = {};
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.add('show');
+    document.getElementById('reviewBanner').innerHTML = '🔁 Reviewing skipped words only <button id="exitReviewBtn">Exit Review</button>';
+    
+    // Re-attach exit button handler
+    document.getElementById('exitReviewBtn').onclick = exitReview;
+    
+    renderCard();
+    updateStats();
+  }
+
+  function exitReview() {
+    if (!reviewMode) return;
+    
+    cards = originalCards.slice();
+    reviewMode = false;
+    originalCards = [];
+    current = 0;
+    
+    document.getElementById('reviewBanner').classList.remove('show');
+    document.getElementById('reviewBanner').innerHTML = '🔁 Reviewing missed words only <button id="exitReviewBtn">Exit Review</button>';
+    
+    // Re-attach exit button handler
+    document.getElementById('exitReviewBtn').onclick = exitReview;
+    
+    renderCard();
+    updateStats();
+  }
+
+  // Setup event handlers
+  document.getElementById('checkBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    checkAnswer();
+    return false;
+  };
+  
+  document.getElementById('nextBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    nextCard();
+    return false;
+  };
+  
+  document.getElementById('skipBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    skipCard();
+    return false;
+  };
+  
+  document.getElementById('shuffleBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    shuffleCards();
+    return false;
+  };
+  
+  document.getElementById('reviewBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    reviewMissed();
+    return false;
+  };
+  
+  document.getElementById('reviewSkippedBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    reviewSkipped();
+    return false;
+  };
+  
+  document.getElementById('exitReviewBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    exitReview();
+    return false;
+  };
+  
+  document.getElementById('tab-all').onclick = function() { setCategory('all'); };
+  document.getElementById('tab-visage').onclick = function() { setCategory('visage'); };
+  document.getElementById('tab-corps').onclick = function() { setCategory('corps'); };
+  document.getElementById('tab-prepositions').onclick = function() { setCategory('prepositions'); };
+  document.getElementById('tab-conjugations').onclick = function() { setCategory('conjugations'); };
+  
+  document.getElementById('mode-fr').onclick = function() { setMode('fr'); };
+  document.getElementById('mode-en').onclick = function() { setMode('en'); };
+  
+  document.getElementById('answerInput').onkeypress = function(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault();
+      if (!answered) {
+        checkAnswer();
+      } else {
+        // If already answered and Next button is showing, trigger it
+        nextCard();
+      }
+    }
+  };
+
+  // Global keyboard handler for Next button when input is disabled
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      // If answered and Next button is visible, trigger it
+      if (answered && document.getElementById('nextBtn').classList.contains('show')) {
+        e.preventDefault();
+        nextCard();
+      }
+    }
+  });
+
+  // Test that JavaScript is working
+  document.getElementById('frontWord').style.border = '2px solid green';
+  setTimeout(function() {
+    document.getElementById('frontWord').style.border = 'none';
+  }, 1000);
+
+  // Initialize
+  renderCard();
+  updateStats();
+})();
+</script>
 </body>
 </html>
