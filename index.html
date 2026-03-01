@@ -116,6 +116,7 @@ h1 span { color: var(--accent1); }
   <button class="tab" id="tab-visage">😊 Le Visage</button>
   <button class="tab" id="tab-corps">🧍 Le Corps</button>
   <button class="tab" id="tab-prepositions">📍 Prepositions</button>
+  <button class="tab" id="tab-magasins">🏪 Les Magasins</button>
   <button class="tab" id="tab-conjugations">🔄 Conjugations</button>
 </div>
 
@@ -125,7 +126,7 @@ h1 span { color: var(--accent1); }
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-<div class="progress-text" id="progressText">Card 1 of 169</div>
+<div class="progress-text" id="progressText">Card 1 of 231</div>
 
 <div class="review-banner" id="reviewBanner">
   🔁 Reviewing missed words only
@@ -162,7 +163,7 @@ h1 span { color: var(--accent1); }
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num red" id="statIncorrect">0</div><div class="stat-label">Learning</div></div>
   <div class="stat-divider"></div>
-  <div class="stat"><div class="stat-num blue" id="statRemaining">169</div><div class="stat-label">Remaining</div></div>
+  <div class="stat"><div class="stat-num blue" id="statRemaining">231</div><div class="stat-label">Remaining</div></div>
 </div>
 
 <div class="bottom-actions">
@@ -190,6 +191,7 @@ h1 span { color: var(--accent1); }
     { fr: "les lèvres", en: "the lips", emoji: "💋", category: "visage" },
     { fr: "les dents", en: "the teeth", emoji: "🦷", category: "visage" },
     { fr: "le menton", en: "the chin", emoji: "🧏", category: "visage" },
+    { fr: "la langue", en: "the tongue", emoji: "👅", category: "visage" },
     { fr: "la tête", en: "the head", emoji: "🧠", category: "corps" },
     { fr: "le cou", en: "the neck", emoji: "🧣", category: "corps" },
     { fr: "le dos", en: "the back", emoji: "🔙", category: "corps" },
@@ -216,7 +218,17 @@ h1 span { color: var(--accent1); }
     { fr: "le majeur", en: "the middle finger", emoji: "🖕", category: "corps" },
     { fr: "l'annulaire", en: "the ring finger", emoji: "💍", category: "corps" },
     { fr: "l'auriculaire", en: "the little finger", emoji: "🤙", category: "corps" },
+    { fr: "une toux", en: "a cough", emoji: "🤧", category: "corps" },
+    { fr: "un rhume", en: "a cold", emoji: "🤒", category: "corps" },
+    { fr: "respirer", en: "to breathe", emoji: "💨", category: "corps" },
     // Prepositions
+    { fr: "opposer", en: "to oppose, opposite", emoji: "⚔️", category: "prepositions", example: "S'opposer à la décision", exampleEn: "To oppose the decision" },
+    { fr: "de milieu", en: "middle, center", emoji: "🎯", category: "prepositions", example: "Au milieu de la pièce", exampleEn: "In the middle of the room" },
+    { fr: "le long de", en: "along", emoji: "➡️", category: "prepositions", example: "Le long de la rivière", exampleEn: "Along the river" },
+    { fr: "à travers", en: "through, across", emoji: "🚶", category: "prepositions", example: "À travers la forêt", exampleEn: "Through the forest" },
+    { fr: "en dessous", en: "below, underneath", emoji: "⬇️", category: "prepositions", example: "En dessous de la table", exampleEn: "Below the table" },
+    { fr: "en dessus", en: "above, on top", emoji: "⬆️", category: "prepositions", example: "En dessus de la boîte", exampleEn: "Above the box" },
+    { fr: "au fond", en: "at the bottom, at the back, basically", emoji: "🔚", category: "prepositions", example: "Au fond de la mer • Au fond, tu as raison", exampleEn: "At the bottom of the sea • Basically, you're right" },
     { fr: "à", en: "to, at", emoji: "➡️", category: "prepositions", example: "Je vais à Paris • Je suis à la maison", exampleEn: "I'm going to Paris • I'm at home" },
     { fr: "de", en: "of, from", emoji: "⬅️", category: "prepositions", example: "Le livre de Marie • Je viens de France", exampleEn: "Marie's book (book of Marie) • I come from France" },
     { fr: "dans", en: "in", emoji: "📦", category: "prepositions", example: "Le chat est dans la boîte", exampleEn: "The cat is in the box" },
@@ -255,6 +267,58 @@ h1 span { color: var(--accent1); }
     { fr: "en face de", en: "across from, opposite", emoji: "↔️", category: "prepositions", example: "En face de l'école", exampleEn: "Across from the school" },
     { fr: "au-dessus de", en: "above", emoji: "⬆️", category: "prepositions", example: "Au-dessus de la table", exampleEn: "Above the table" },
     { fr: "au-dessous de", en: "below", emoji: "⬇️", category: "prepositions", example: "Au-dessous de zéro", exampleEn: "Below zero" },
+    // Les Magasins (Shops/Stores)
+    { fr: "la boulangerie", en: "the bakery", emoji: "🥖", category: "magasins" },
+    { fr: "la boucherie", en: "the butcher shop", emoji: "🥩", category: "magasins" },
+    { fr: "la pharmacie", en: "the pharmacy", emoji: "💊", category: "magasins" },
+    { fr: "le supermarché", en: "the supermarket", emoji: "🛒", category: "magasins" },
+    { fr: "l'épicerie", en: "the grocery store", emoji: "🏪", category: "magasins" },
+    { fr: "le marché", en: "the market", emoji: "🛍️", category: "magasins" },
+    { fr: "la librairie", en: "the bookstore", emoji: "📚", category: "magasins" },
+    { fr: "la bibliothèque", en: "the library", emoji: "📖", category: "magasins" },
+    { fr: "le restaurant", en: "the restaurant", emoji: "🍽️", category: "magasins" },
+    { fr: "le café", en: "the café", emoji: "☕", category: "magasins" },
+    { fr: "la banque", en: "the bank", emoji: "🏦", category: "magasins" },
+    { fr: "la poste", en: "the post office", emoji: "📮", category: "magasins" },
+    { fr: "la gare", en: "the train station", emoji: "🚉", category: "magasins" },
+    { fr: "l'aéroport", en: "the airport", emoji: "✈️", category: "magasins" },
+    { fr: "l'hôpital", en: "the hospital", emoji: "🏥", category: "magasins" },
+    { fr: "l'école", en: "the school", emoji: "🏫", category: "magasins" },
+    { fr: "le magasin", en: "the store", emoji: "🏬", category: "magasins" },
+    { fr: "le centre commercial", en: "the shopping mall", emoji: "🏢", category: "magasins" },
+    { fr: "la boutique", en: "the shop", emoji: "👗", category: "magasins" },
+    { fr: "le kiosque", en: "the newsstand", emoji: "📰", category: "magasins" },
+    { fr: "la pâtisserie", en: "the pastry shop", emoji: "🧁", category: "magasins" },
+    { fr: "la fromagerie", en: "the cheese shop", emoji: "🧀", category: "magasins" },
+    { fr: "la poissonnerie", en: "the fish market", emoji: "🐟", category: "magasins" },
+    { fr: "le fleuriste", en: "the florist", emoji: "💐", category: "magasins" },
+    { fr: "la bijouterie", en: "the jewelry store", emoji: "💎", category: "magasins" },
+    { fr: "la charcuterie", en: "the deli", emoji: "🥓", category: "magasins" },
+    { fr: "la crémerie", en: "the dairy shop", emoji: "🥛", category: "magasins" },
+    { fr: "la confiserie", en: "the candy shop", emoji: "🍬", category: "magasins" },
+    { fr: "la chocolaterie", en: "the chocolate shop", emoji: "🍫", category: "magasins" },
+    { fr: "le pressing", en: "the dry cleaner", emoji: "👔", category: "magasins" },
+    { fr: "la laverie", en: "the laundromat", emoji: "🧺", category: "magasins" },
+    { fr: "le salon de coiffure", en: "the hair salon", emoji: "💇", category: "magasins" },
+    { fr: "la parfumerie", en: "the perfume shop", emoji: "🧴", category: "magasins" },
+    { fr: "l'opticien", en: "the optician", emoji: "👓", category: "magasins" },
+    { fr: "la cordonnerie", en: "the shoe repair shop", emoji: "👞", category: "magasins" },
+    { fr: "la quincaillerie", en: "the hardware store", emoji: "🔨", category: "magasins" },
+    { fr: "le bureau de tabac", en: "the tobacco shop", emoji: "🚬", category: "magasins" },
+    { fr: "la papeterie", en: "the stationery store", emoji: "✏️", category: "magasins" },
+    { fr: "le magasin de jouets", en: "the toy store", emoji: "🧸", category: "magasins" },
+    { fr: "le magasin de vêtements", en: "the clothing store", emoji: "👕", category: "magasins" },
+    { fr: "le magasin de chaussures", en: "the shoe store", emoji: "👠", category: "magasins" },
+    { fr: "le magasin de meubles", en: "the furniture store", emoji: "🛋️", category: "magasins" },
+    { fr: "le magasin de sport", en: "the sporting goods store", emoji: "⚽", category: "magasins" },
+    { fr: "le magasin d'électronique", en: "the electronics store", emoji: "📱", category: "magasins" },
+    { fr: "l'animalerie", en: "the pet shop", emoji: "🐾", category: "magasins" },
+    { fr: "la jardinerie", en: "the garden center", emoji: "🌱", category: "magasins" },
+    { fr: "le traiteur", en: "the caterer", emoji: "🍱", category: "magasins" },
+    { fr: "l'agence de voyage", en: "the travel agency", emoji: "🌍", category: "magasins" },
+    { fr: "l'électroménager", en: "the appliance store", emoji: "🔌", category: "magasins" },
+    { fr: "le concessionnaire auto", en: "the car dealership", emoji: "🚗", category: "magasins" },
+    { fr: "le magasin de photo", en: "the camera shop", emoji: "📷", category: "magasins" },
     // Conjugations - ÊTRE (to be)
     { fr: "je suis", en: "I am", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
     { fr: "tu es", en: "you are (informal)", emoji: "👤", category: "conjugations", verb: "être", tense: "présent" },
@@ -613,6 +677,7 @@ h1 span { color: var(--accent1); }
     document.getElementById('tab-visage').classList.toggle('active', cat === 'visage');
     document.getElementById('tab-corps').classList.toggle('active', cat === 'corps');
     document.getElementById('tab-prepositions').classList.toggle('active', cat === 'prepositions');
+    document.getElementById('tab-magasins').classList.toggle('active', cat === 'magasins');
     document.getElementById('tab-conjugations').classList.toggle('active', cat === 'conjugations');
     
     if (cat === 'all') {
@@ -830,6 +895,7 @@ h1 span { color: var(--accent1); }
   document.getElementById('tab-visage').onclick = function() { setCategory('visage'); };
   document.getElementById('tab-corps').onclick = function() { setCategory('corps'); };
   document.getElementById('tab-prepositions').onclick = function() { setCategory('prepositions'); };
+  document.getElementById('tab-magasins').onclick = function() { setCategory('magasins'); };
   document.getElementById('tab-conjugations').onclick = function() { setCategory('conjugations'); };
   
   document.getElementById('mode-fr').onclick = function() { setMode('fr'); };
