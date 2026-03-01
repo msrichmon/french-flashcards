@@ -169,6 +169,7 @@ h1 span { color: var(--accent1); }
   <button class="btn-shuffle" id="shuffleBtn">🔀 Shuffle Cards</button>
   <button class="btn-review" id="reviewBtn" disabled>📖 Review Missed</button>
   <button class="btn-review" id="reviewSkippedBtn" disabled>⏭️ Review Skipped</button>
+  <button class="btn-shuffle" id="resetBtn">🗑️ Reset Progress</button>
 </div>
 
 <script>
@@ -736,6 +737,38 @@ h1 span { color: var(--accent1); }
     updateStats();
   }
 
+  function resetProgress() {
+    if (confirm('Reset all progress? This will clear all your scores and cannot be undone.')) {
+      // Clear in-memory data
+      scores = {};
+      skippedCards = {};
+      current = 0;
+      reviewMode = false;
+      
+      // Clear localStorage
+      try {
+        localStorage.removeItem('french_flashcards_scores');
+        localStorage.removeItem('french_flashcards_skipped');
+        console.log('🗑️ Progress reset');
+      } catch (e) {
+        console.error('Reset error:', e);
+      }
+      
+      // Reset UI
+      document.getElementById('reviewBanner').classList.remove('show');
+      renderCard();
+      updateStats();
+      
+      // Show confirmation
+      const fb = document.getElementById('feedbackStrip');
+      fb.textContent = '🗑️ Progress reset successfully';
+      fb.className = 'feedback-strip correct-strip show';
+      setTimeout(function() {
+        fb.className = 'feedback-strip';
+      }, 2000);
+    }
+  }
+
   // Setup event handlers
   document.getElementById('checkBtn').onclick = function(e) {
     e.preventDefault();
@@ -776,6 +809,13 @@ h1 span { color: var(--accent1); }
     e.preventDefault();
     e.stopPropagation();
     reviewSkipped();
+    return false;
+  };
+  
+  document.getElementById('resetBtn').onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    resetProgress();
     return false;
   };
   
@@ -824,63 +864,61 @@ h1 span { color: var(--accent1); }
     document.getElementById('frontWord').style.border = 'none';
   }, 1000);
 
-  // Initialize
+  // ============================================================================
+  // LOCAL STORAGE PERSISTENCE (saves to this device only)
+  // ============================================================================
+
+  function saveProgress() {
+    try {
+      localStorage.setItem('french_flashcards_scores', JSON.stringify(scores));
+      localStorage.setItem('french_flashcards_skipped', JSON.stringify(skippedCards));
+      console.log('💾 Progress saved');
+    } catch (e) {
+      console.error('Save error:', e);
+    }
+  }
+
+  function loadProgress() {
+    try {
+      const savedScores = localStorage.getItem('french_flashcards_scores');
+      const savedSkipped = localStorage.getItem('french_flashcards_skipped');
+      
+      if (savedScores) {
+        scores = JSON.parse(savedScores);
+      }
+      if (savedSkipped) {
+        skippedCards = JSON.parse(savedSkipped);
+      }
+      
+      if (savedScores || savedSkipped) {
+        updateStats();
+        console.log('📥 Progress loaded');
+      }
+    } catch (e) {
+      console.error('Load error:', e);
+    }
+  }
+
+  // Wrap functions to auto-save
+  const originalCheckAnswer = checkAnswer;
+  checkAnswer = function() {
+    originalCheckAnswer();
+    saveProgress();
+  };
+
+  const originalSkipCard = skipCard;
+  skipCard = function() {
+    originalSkipCard();
+    saveProgress();
+  };
+
+  // Initialize and load saved progress
   renderCard();
   updateStats();
-  
-  // Load saved progress from localStorage
   loadProgress();
+  
+  console.log('💾 localStorage persistence active');
 })();
-
-// ============================================================================
-// LOCAL STORAGE PERSISTENCE (saves to this device only)
-// ============================================================================
-
-function saveProgress() {
-  try {
-    localStorage.setItem('french_flashcards_scores', JSON.stringify(scores));
-    localStorage.setItem('french_flashcards_skipped', JSON.stringify(skippedCards));
-    console.log('💾 Progress saved');
-  } catch (e) {
-    console.error('Save error:', e);
-  }
-}
-
-function loadProgress() {
-  try {
-    const savedScores = localStorage.getItem('french_flashcards_scores');
-    const savedSkipped = localStorage.getItem('french_flashcards_skipped');
-    
-    if (savedScores) {
-      scores = JSON.parse(savedScores);
-    }
-    if (savedSkipped) {
-      skippedCards = JSON.parse(savedSkipped);
-    }
-    
-    if (savedScores || savedSkipped) {
-      updateStats();
-      console.log('📥 Progress loaded');
-    }
-  } catch (e) {
-    console.error('Load error:', e);
-  }
-}
-
-// Auto-save after every action
-const originalCheckAnswer = checkAnswer;
-checkAnswer = function() {
-  originalCheckAnswer();
-  saveProgress();
-};
-
-const originalSkipCard = skipCard;
-skipCard = function() {
-  originalSkipCard();
-  saveProgress();
-};
-
-console.log('💾 localStorage persistence active');
 </script>
 </body>
 </html>
