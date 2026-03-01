@@ -5,29 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>French Flashcards</title>
-<script>
-        // Check if there are existing flashcards in localStorage
-        const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
-
-        // Function to save flashcard data to localStorage
-        function saveFlashcards() {
-            localStorage.setItem('flashcards', JSON.stringify(flashcards));
-        }
-
-        // Example of adding a new flashcard
-        function addFlashcard(front, back) {
-            flashcards.push({ front, back });
-            saveFlashcards();
-        }
-
-        // Load flashcards from localStorage on page load
-        window.onload = function() {
-            flashcards.forEach(card => {
-                // Logic to display the flashcard on the page
-                console.log(card.front, card.back);
-            });
-        };
-    </script>
 <style>
 :root {
   --bg: #FFF8F0;
@@ -850,7 +827,60 @@ h1 span { color: var(--accent1); }
   // Initialize
   renderCard();
   updateStats();
+  
+  // Load saved progress from localStorage
+  loadProgress();
 })();
+
+// ============================================================================
+// LOCAL STORAGE PERSISTENCE (saves to this device only)
+// ============================================================================
+
+function saveProgress() {
+  try {
+    localStorage.setItem('french_flashcards_scores', JSON.stringify(scores));
+    localStorage.setItem('french_flashcards_skipped', JSON.stringify(skippedCards));
+    console.log('💾 Progress saved');
+  } catch (e) {
+    console.error('Save error:', e);
+  }
+}
+
+function loadProgress() {
+  try {
+    const savedScores = localStorage.getItem('french_flashcards_scores');
+    const savedSkipped = localStorage.getItem('french_flashcards_skipped');
+    
+    if (savedScores) {
+      scores = JSON.parse(savedScores);
+    }
+    if (savedSkipped) {
+      skippedCards = JSON.parse(savedSkipped);
+    }
+    
+    if (savedScores || savedSkipped) {
+      updateStats();
+      console.log('📥 Progress loaded');
+    }
+  } catch (e) {
+    console.error('Load error:', e);
+  }
+}
+
+// Auto-save after every action
+const originalCheckAnswer = checkAnswer;
+checkAnswer = function() {
+  originalCheckAnswer();
+  saveProgress();
+};
+
+const originalSkipCard = skipCard;
+skipCard = function() {
+  originalSkipCard();
+  saveProgress();
+};
+
+console.log('💾 localStorage persistence active');
 </script>
 </body>
 </html>
