@@ -4,37 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>French Flashcards</title>
+    <script>
+        // Check if there are existing flashcards in localStorage
+        const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+
+        // Function to save flashcard data to localStorage
+        function saveFlashcards() {
+            localStorage.setItem('flashcards', JSON.stringify(flashcards));
+        }
+
+        // Example of adding a new flashcard
+        function addFlashcard(front, back) {
+            flashcards.push({ front, back });
+            saveFlashcards();
+        }
+
+        // Load flashcards from localStorage on page load
+        window.onload = function() {
+            flashcards.forEach(card => {
+                // Logic to display the flashcard on the page
+                console.log(card.front, card.back);
+            });
+        };
+    </script>
 </head>
 <body>
     <h1>French Flashcards</h1>
-    <div id="flashcard-container"></div>
-    <button id="save-button">Save Progress</button>
-    <button id="load-button">Load Progress</button>
-    <script>
-        const flashcards = [
-            { question: 'What is "apple" in French?', answer: 'pomme' },
-            { question: 'What is "book" in French?', answer: 'livre' },
-            // Add more flashcards as needed
-        ];
-
-        function saveToLocalStorage() {
-            localStorage.setItem('flashcards', JSON.stringify(flashcards));
-            alert('Flashcards saved!');
-        }
-
-        function loadFromLocalStorage() {
-            const savedFlashcards = localStorage.getItem('flashcards');
-            if (savedFlashcards) {
-                const parsedFlashcards = JSON.parse(savedFlashcards);
-                // Logic to update UI with saved flashcards
-                alert('Flashcards loaded!');
-            } else {
-                alert('No saved flashcards found.');
-            }
-        }
-
-        document.getElementById('save-button').addEventListener('click', saveToLocalStorage);
-        document.getElementById('load-button').addEventListener('click', loadFromLocalStorage);
-    </script>
+    <!-- Your flashcard UI goes here -->
 </body>
 </html>
